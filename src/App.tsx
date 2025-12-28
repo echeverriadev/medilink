@@ -4,6 +4,7 @@ import Dashboard from './modules/dashboard/pages/Dashboard';
 import Patients from './modules/dashboard/pages/Patients';
 import PatientDetail from './modules/dashboard/pages/PatientDetail';
 import Appointments from './modules/dashboard/pages/Appointments';
+import ConsultationPage from './modules/dashboard/pages/ConsultationPage';
 import PatientPortalLayout from './modules/patient-portal/layouts/PatientPortalLayout';
 import PatientAppointments from './modules/patient-portal/pages/PatientAppointments';
 import LoginPage from './modules/auth/pages/LoginPage';
@@ -29,6 +30,7 @@ function App() {
                         <Route index element={<Navigate to="/dashboard" replace />} />
                         <Route path="dashboard" element={<Dashboard />} />
                         <Route path="appointments" element={<Appointments />} />
+                        <Route path="appointments/:id/consultation" element={<ConsultationPage />} />
                         <Route path="patients" element={<Patients />} />
                         <Route path="patients/:cedula" element={<PatientDetail />} />
                     </Route>
