@@ -2,6 +2,7 @@ import { collection, doc, getDocs, getDoc, query, where, addDoc, updateDoc, dele
 import { db } from "../../../config/firebase";
 import emailjs from '@emailjs/browser';
 import { generateGoogleCalendarLink } from "../../shared/utils/calendarUtils";
+import { sendAppointmentReminderSMS } from "./smsService";
 
 // EmailJS Configuration from environment variables
 const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
@@ -22,6 +23,7 @@ export interface Appointment {
     patientId: string;
     patientName: string;
     patientEmail: string;
+    patientPhone?: string; // Added to support SMS
     doctorId: string;
     doctorEmail: string;
     title: string;
@@ -54,7 +56,8 @@ export const createAppointment = async (data: Omit<Appointment, 'id' | 'createdA
             appointment_date: new Date(data.start).toLocaleDateString(),
             appointment_time: new Date(data.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             appointment_description: data.description || 'General Checkup',
-            calendar_link: googleLink
+            calendar_link: googleLink,
+            confirmation_link: `${window.location.origin}/confirm-appointment/${docRef.id}`
         };
 
         if (EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_ID && EMAILJS_PUBLIC_KEY) {
@@ -73,6 +76,16 @@ export const createAppointment = async (data: Omit<Appointment, 'id' | 'createdA
             );
         } else {
             console.warn('EmailJS credentials not found in .env. Emails skipped.');
+        }
+
+        if (data.patientPhone) {
+            sendAppointmentReminderSMS(
+                data.patientPhone,
+                data.patientName,
+                new Date(data.start).toLocaleDateString(),
+                new Date(data.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                templateParams.confirmation_link
+            );
         }
 
         return { id: docRef.id, ...appointmentData };

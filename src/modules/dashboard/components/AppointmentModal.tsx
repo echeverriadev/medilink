@@ -147,6 +147,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({ isOpen, onClose, on
                 patientId: formData.patientId,
                 patientName: selectedPatient.fullName,
                 patientEmail: selectedPatient.email,
+                patientPhone: selectedPatient.phone,
                 doctorId: user.uid,
                 doctorEmail: user.email || '',
                 title: formData.title || `${formData.type.charAt(0).toUpperCase() + formData.type.slice(1)} with ${selectedPatient.fullName}`,
