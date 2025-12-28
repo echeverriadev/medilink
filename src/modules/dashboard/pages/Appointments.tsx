@@ -35,7 +35,7 @@ const Appointments: React.FC = () => {
                 title: apt.title,
                 start: apt.start,
                 end: apt.end,
-                color: apt.status === 'cancelled' ? '#ef4444' : undefined,
+                color: apt.status === 'cancelled' ? '#ef4444' : (apt.color || '#3b82f6'),
                 extendedProps: { ...apt }
             }));
 
@@ -55,9 +55,9 @@ const Appointments: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleEventClick = (clickInfo: { event: { extendedProps: Appointment } }) => {
+    const handleEventClick = (clickInfo: any) => {
         setSelectedSlot(null);
-        setSelectedAppointment(clickInfo.event.extendedProps);
+        setSelectedAppointment(clickInfo.event.extendedProps as Appointment);
         setIsModalOpen(true);
     };
 

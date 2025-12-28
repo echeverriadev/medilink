@@ -8,9 +8,19 @@ export const pushEventToGoogleCalendar = async (appointment: Appointment) => {
         return null;
     }
 
+    // Map internal types to Google Calendar colorId (1-11)
+    // 1: Lavender, 2: Sage, 3: Grape, 4: Flamingo, 5: Banana, 6: Tangerine, 7: Peacock, 8: Graphite, 9: Blueberry, 10: Basil, 11: Tomato
+    const googleColors: Record<string, string> = {
+        consulta: '7',   // Peacock (Blue)
+        cirugia: '11',  // Tomato (Red)
+        vacuna: '10',   // Basil (Green)
+        exonerada: '5'  // Banana (Yellow)
+    };
+
     const event = {
-        'summary': appointment.title,
-        'description': appointment.description,
+        'summary': `${appointment.title} (${appointment.type.toUpperCase()})`,
+        'description': `${appointment.description || ''}\n\nType: ${appointment.type}`,
+        'colorId': googleColors[appointment.type] || '1',
         'start': {
             'dateTime': appointment.start,
             'timeZone': Intl.DateTimeFormat().resolvedOptions().timeZone
