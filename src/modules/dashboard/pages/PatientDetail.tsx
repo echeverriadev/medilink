@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getPatientByCedula, PatientData } from '../services/patientService';
 import { getPatientAppointments, Appointment } from '../services/appointmentService';
+import { getPatientConsultations, Consultation } from '../services/consultationService';
 
 const PatientDetail: React.FC = () => {
     const { cedula } = useParams<{ cedula: string }>();
     const navigate = useNavigate();
     const [patient, setPatient] = useState<PatientData | null>(null);
     const [appointments, setAppointments] = useState<Appointment[]>([]);
+    const [consultations, setConsultations] = useState<Consultation[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'history' | 'visits' | 'exams'>('history');
     const [showAllVisits, setShowAllVisits] = useState(false);
@@ -19,8 +21,12 @@ const PatientDetail: React.FC = () => {
                 const data = await getPatientByCedula(cedula);
                 setPatient(data);
                 if (data && data.id) {
-                    const apts = await getPatientAppointments(data.id);
+                    const [apts, cons] = await Promise.all([
+                        getPatientAppointments(data.id),
+                        getPatientConsultations(data.id)
+                    ]);
                     setAppointments(apts);
+                    setConsultations(cons);
                 }
             } catch (error) {
                 console.error("Error fetching patient details:", error);
@@ -145,25 +151,60 @@ const PatientDetail: React.FC = () => {
 
                         <div className="p-8">
                             {activeTab === 'history' && (
-                                <div className="space-y-8">
-                                    <div className="relative pl-8 border-l-2 border-dashed border-gray-100">
-                                        <div className="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-blue-600 shadow-[0_0_0_4px_rgba(37,99,235,0.1)]"></div>
-                                        <div>
-                                            <p className="text-xs font-bold text-blue-600 mb-1">Dec 27, 2025</p>
-                                            <h4 className="text-lg font-bold text-gray-800">Registration & Initial Profile</h4>
-                                            <p className="text-gray-600 mt-2 text-sm">
-                                                Patient profile created by administrative staff. Basic clinical data recorded.
-                                            </p>
-                                        </div>
-                                    </div>
+                                <div className="space-y-6">
+                                    {consultations.length > 0 ? (
+                                        consultations.map((consultation) => (
+                                            <div key={consultation.id} className="relative pl-8 border-l-2 border-dashed border-gray-100 pb-8 last:pb-0">
+                                                <div className="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-blue-600 shadow-[0_0_0_4px_rgba(37,99,235,0.1)]"></div>
+                                                <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 hover:shadow-sm transition-shadow">
+                                                    <div className="flex justify-between items-start mb-4">
+                                                        <div>
+                                                            <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">
+                                                                Consultation - {new Date(consultation.date).toLocaleDateString()}
+                                                            </span>
+                                                            <p className="text-gray-400 text-[10px] mt-0.5">Record ID: {consultation.id}</p>
+                                                        </div>
+                                                    </div>
 
-                                    <div className="flex flex-col items-center justify-center py-12 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                                        <svg className="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                        </svg>
-                                        <p className="text-gray-400 font-medium">No medical visits recorded yet.</p>
-                                        <button className="mt-4 text-blue-600 text-sm font-bold hover:underline">Add first consultation</button>
-                                    </div>
+                                                    <div className="space-y-4">
+                                                        <div>
+                                                            <h4 className="text-xs font-bold text-gray-700 uppercase mb-2 flex items-center gap-2">
+                                                                <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                                </svg>
+                                                                Observations
+                                                            </h4>
+                                                            <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-wrap">{consultation.observations}</p>
+                                                        </div>
+
+                                                        {(consultation.medications || consultation.exams) && (
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                                                                {consultation.medications && (
+                                                                    <div className="bg-white p-4 rounded-xl border border-gray-100">
+                                                                        <h5 className="text-[10px] font-bold text-indigo-600 uppercase mb-2">Prescription</h5>
+                                                                        <p className="text-gray-600 text-xs whitespace-pre-wrap">{consultation.medications}</p>
+                                                                    </div>
+                                                                )}
+                                                                {consultation.exams && (
+                                                                    <div className="bg-white p-4 rounded-xl border border-gray-100">
+                                                                        <h5 className="text-[10px] font-bold text-purple-600 uppercase mb-2">Required Exams</h5>
+                                                                        <p className="text-gray-600 text-xs whitespace-pre-wrap">{consultation.exams}</p>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center py-12 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                                            <svg className="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                            <p className="text-gray-400 font-medium">No medical visits recorded yet.</p>
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
