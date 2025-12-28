@@ -32,6 +32,7 @@ export interface Appointment {
     description: string;
     status: 'scheduled' | 'confirmed' | 'cancelled' | 'completed';
     googleEventId?: string;
+    recurringGroupId?: string; // To identify a set of recurring appointments
     createdAt: string;
 }
 
@@ -79,6 +80,43 @@ export const createAppointment = async (data: Omit<Appointment, 'id' | 'createdA
         console.error("Error creating appointment:", error);
         throw error;
     }
+};
+
+export const createRecurringAppointments = async (
+    baseData: Omit<Appointment, 'id' | 'createdAt'>,
+    frequency: 'daily' | 'weekly' | 'monthly',
+    count: number
+) => {
+    const appointments: Appointment[] = [];
+    const recurringGroupId = Math.random().toString(36).substring(7);
+
+    for (let i = 0; i < count; i++) {
+        const start = new Date(baseData.start);
+        const end = new Date(baseData.end);
+
+        if (frequency === 'daily') {
+            start.setDate(start.getDate() + i);
+            end.setDate(end.getDate() + i);
+        } else if (frequency === 'weekly') {
+            start.setDate(start.getDate() + (i * 7));
+            end.setDate(end.getDate() + (i * 7));
+        } else if (frequency === 'monthly') {
+            start.setMonth(start.getMonth() + i);
+            end.setMonth(end.getMonth() + i);
+        }
+
+        const appointmentData = {
+            ...baseData,
+            start: start.toISOString(),
+            end: end.toISOString(),
+            recurringGroupId
+        };
+
+        const result = await createAppointment(appointmentData);
+        appointments.push(result);
+    }
+
+    return appointments;
 };
 
 export const getDoctorAppointments = async (doctorId: string) => {
