@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getPatients, PatientData } from '../services/patientService';
-import { createAppointment, updateAppointment, deleteAppointment, Appointment } from '../services/appointmentService';
+import { createAppointment, updateAppointment, deleteAppointment, Appointment, AppointmentType, APPOINTMENT_COLORS } from '../services/appointmentService';
 import { useAuth } from '../../auth/context/AuthContext';
 import { pushEventToGoogleCalendar, deleteEventFromGoogleCalendar } from '../services/googleCalendarService';
 import { isGoogleConnected } from '../services/googleAuthService';
@@ -22,6 +22,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({ isOpen, onClose, on
     const [formData, setFormData] = useState({
         patientId: '',
         title: '',
+        type: 'consulta' as AppointmentType,
         description: '',
         date: '',
         startTime: '',
@@ -47,6 +48,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({ isOpen, onClose, on
             setFormData({
                 patientId: appointmentToEdit.patientId,
                 title: appointmentToEdit.title,
+                type: appointmentToEdit.type || 'consulta',
                 description: appointmentToEdit.description,
                 date: dateStr,
                 startTime,
@@ -141,7 +143,9 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({ isOpen, onClose, on
                 patientEmail: selectedPatient.email,
                 doctorId: user.uid,
                 doctorEmail: user.email || '',
-                title: formData.title || `Consultation with ${selectedPatient.fullName}`,
+                title: formData.title || `${formData.type.charAt(0).toUpperCase() + formData.type.slice(1)} with ${selectedPatient.fullName}`,
+                type: formData.type,
+                color: APPOINTMENT_COLORS[formData.type],
                 start: startISO,
                 end: endISO,
                 description: formData.description,
@@ -225,6 +229,31 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({ isOpen, onClose, on
                                 className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                                 placeholder="E.g. Monthly Checkup"
                             />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">Appointment Type</label>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                {(['consulta', 'cirugia', 'vacuna', 'exonerada'] as AppointmentType[]).map((type) => (
+                                    <button
+                                        key={type}
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, type })}
+                                        className={`px-3 py-2 rounded-lg text-xs font-bold capitalize transition-all border-2 ${formData.type === type
+                                            ? 'bg-white border-blue-500 text-blue-700 shadow-sm'
+                                            : 'bg-gray-50 border-transparent text-gray-500 hover:bg-gray-100'
+                                            }`}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <span
+                                                className="w-2 h-2 rounded-full"
+                                                style={{ backgroundColor: APPOINTMENT_COLORS[type] }}
+                                            ></span>
+                                            {type}
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">

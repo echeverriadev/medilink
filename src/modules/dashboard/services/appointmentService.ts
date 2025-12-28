@@ -8,14 +8,25 @@ const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
 const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
 const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
+export type AppointmentType = 'consulta' | 'cirugia' | 'vacuna' | 'exonerada';
+
+export const APPOINTMENT_COLORS: Record<AppointmentType, string> = {
+    consulta: '#3b82f6', // blue-500
+    cirugia: '#ef4444',  // red-500
+    vacuna: '#10b981',   // emerald-500
+    exonerada: '#f59e0b' // amber-500
+};
+
 export interface Appointment {
     id?: string;
     patientId: string;
     patientName: string;
     patientEmail: string;
     doctorId: string;
-    doctorEmail: string; // Added to support doctor notifications/sync
+    doctorEmail: string;
     title: string;
+    type: AppointmentType;
+    color: string;
     start: string;
     end: string;
     description: string;
