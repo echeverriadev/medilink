@@ -67,8 +67,8 @@ export const createAppointment = async (data: Omit<Appointment, 'id' | 'createdA
                 templateParams,
                 EMAILJS_PUBLIC_KEY
             ).then(
-                (response) => {
-                    console.log('Emails successfully sent!', response.status, response.text);
+                () => {
+                    // Email sent successfully
                 },
                 (err) => {
                     console.error('Failed to send emails:', err);

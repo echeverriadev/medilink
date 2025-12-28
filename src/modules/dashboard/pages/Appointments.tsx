@@ -27,7 +27,6 @@ const Appointments: React.FC = () => {
         if (!user) return;
         try {
             const data = await getDoctorAppointments(user.uid);
-            console.log("Fetched appointments for UI:", data);
 
             // Map to FullCalendar expected format explicitly
             const fcEvents = data.map(apt => ({
@@ -55,7 +54,7 @@ const Appointments: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleEventClick = (clickInfo: { event: { extendedProps: any } }) => {
+    const handleEventClick = (clickInfo: { event: { extendedProps: unknown } }) => {
         setSelectedSlot(null);
         setSelectedAppointment(clickInfo.event.extendedProps as Appointment);
         setIsModalOpen(true);
