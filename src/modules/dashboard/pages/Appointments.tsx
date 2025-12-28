@@ -4,7 +4,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import AppointmentModal from '../components/AppointmentModal';
-import { getDoctorAppointments } from '../services/appointmentService';
+import { getDoctorAppointments, Appointment } from '../services/appointmentService';
 import { useAuth } from '../../auth/context/AuthContext';
 
 interface CalendarEvent {
@@ -12,7 +12,8 @@ interface CalendarEvent {
     title: string;
     start: string;
     end: string;
-    extendedProps?: Record<string, unknown>;
+    color?: string;
+    extendedProps?: Appointment;
 }
 
 const Appointments: React.FC = () => {
@@ -20,6 +21,7 @@ const Appointments: React.FC = () => {
     const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+    const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
 
     const fetchAppointments = React.useCallback(async () => {
         if (!user) return;
@@ -33,6 +35,7 @@ const Appointments: React.FC = () => {
                 title: apt.title,
                 start: apt.start,
                 end: apt.end,
+                color: apt.status === 'cancelled' ? '#ef4444' : undefined,
                 extendedProps: { ...apt }
             }));
 
@@ -47,15 +50,15 @@ const Appointments: React.FC = () => {
     }, [fetchAppointments]);
 
     const handleDateSelect = (selectInfo: { startStr: string }) => {
+        setSelectedAppointment(null);
         setSelectedSlot(selectInfo.startStr);
         setIsModalOpen(true);
     };
 
-    const handleEventClick = (clickInfo: { event: { title: string; id: string } }) => {
-        if (window.confirm(`Are you sure you want to delete the appointment '${clickInfo.event.title}'?`)) {
-            // Logic for deletion or viewing details could go here
-            console.log("Event clicked:", clickInfo.event.id);
-        }
+    const handleEventClick = (clickInfo: { event: { extendedProps: Appointment } }) => {
+        setSelectedSlot(null);
+        setSelectedAppointment(clickInfo.event.extendedProps);
+        setIsModalOpen(true);
     };
 
     return (
@@ -115,6 +118,7 @@ const Appointments: React.FC = () => {
                 onClose={() => setIsModalOpen(false)}
                 onAppointmentCreated={fetchAppointments}
                 initialStart={selectedSlot}
+                appointmentToEdit={selectedAppointment}
             />
         </div>
     );

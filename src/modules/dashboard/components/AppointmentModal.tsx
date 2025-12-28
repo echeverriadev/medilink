@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getPatients, PatientData } from '../services/patientService';
-import { createAppointment } from '../services/appointmentService';
+import { createAppointment, updateAppointment, Appointment } from '../services/appointmentService';
 import { useAuth } from '../../auth/context/AuthContext';
 
 interface AppointmentModalProps {
@@ -8,9 +8,10 @@ interface AppointmentModalProps {
     onClose: () => void;
     onAppointmentCreated: () => void;
     initialStart?: string | null;
+    appointmentToEdit?: Appointment | null;
 }
 
-const AppointmentModal: React.FC<AppointmentModalProps> = ({ isOpen, onClose, onAppointmentCreated, initialStart }) => {
+const AppointmentModal: React.FC<AppointmentModalProps> = ({ isOpen, onClose, onAppointmentCreated, initialStart, appointmentToEdit }) => {
     const { user } = useAuth();
     const [loading, setLoading] = useState(false);
     const [patients, setPatients] = useState<PatientData[]>([]);
@@ -34,7 +35,22 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({ isOpen, onClose, on
     }, [isOpen]);
 
     useEffect(() => {
-        if (initialStart) {
+        if (appointmentToEdit) {
+            const date = new Date(appointmentToEdit.start);
+            const dateStr = date.toISOString().split('T')[0];
+            const startTime = date.toTimeString().substring(0, 5);
+            const endDate = new Date(appointmentToEdit.end);
+            const endTime = endDate.toTimeString().substring(0, 5);
+
+            setFormData({
+                patientId: appointmentToEdit.patientId,
+                title: appointmentToEdit.title,
+                description: appointmentToEdit.description,
+                date: dateStr,
+                startTime,
+                endTime
+            });
+        } else if (initialStart) {
             const date = new Date(initialStart);
             const dateStr = date.toISOString().split('T')[0];
             const startTime = date.toTimeString().substring(0, 5);
@@ -50,12 +66,29 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({ isOpen, onClose, on
                 endTime
             }));
         }
-    }, [initialStart]);
+    }, [appointmentToEdit, initialStart]);
 
     if (!isOpen) return null;
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleCancel = async () => {
+        if (!appointmentToEdit?.id) return;
+        if (!window.confirm("Are you sure you want to cancel this appointment?")) return;
+
+        setLoading(true);
+        try {
+            await updateAppointment(appointmentToEdit.id, { status: 'cancelled' });
+            onAppointmentCreated();
+            onClose();
+        } catch (err) {
+            const error = err as Error;
+            setError(error.message || "Failed to cancel appointment");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -72,23 +105,29 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({ isOpen, onClose, on
             const startISO = new Date(`${formData.date}T${formData.startTime}`).toISOString();
             const endISO = new Date(`${formData.date}T${formData.endTime}`).toISOString();
 
-            await createAppointment({
+            const appointmentData = {
                 patientId: formData.patientId,
                 patientName: selectedPatient.fullName,
-                patientEmail: selectedPatient.email, // Passing the email for the extension
+                patientEmail: selectedPatient.email,
                 doctorId: user.uid,
                 title: formData.title || `Consultation with ${selectedPatient.fullName}`,
                 start: startISO,
                 end: endISO,
                 description: formData.description,
-                status: 'confirmed'
-            });
+                status: (appointmentToEdit?.status || 'confirmed') as 'confirmed' | 'cancelled' | 'scheduled' | 'completed'
+            };
+
+            if (appointmentToEdit?.id) {
+                await updateAppointment(appointmentToEdit.id, appointmentData);
+            } else {
+                await createAppointment(appointmentData);
+            }
 
             onAppointmentCreated();
             onClose();
         } catch (err) {
             const error = err as Error;
-            setError(error.message || "Failed to schedule appointment");
+            setError(error.message || "Failed to save appointment");
         } finally {
             setLoading(false);
         }
@@ -171,17 +210,25 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({ isOpen, onClose, on
                     </div>
 
                     <div className="pt-4 border-t border-gray-100 flex gap-3">
+                        {appointmentToEdit && appointmentToEdit.status !== 'cancelled' && (
+                            <button
+                                type="button" onClick={handleCancel} disabled={loading}
+                                className="px-4 py-2 bg-red-50 text-red-600 font-bold rounded-lg hover:bg-red-100 transition-all text-sm border border-red-100"
+                            >
+                                Cancel Appointment
+                            </button>
+                        )}
                         <button
                             type="button" onClick={onClose}
                             className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition-all text-sm"
                         >
-                            Cancel
+                            Close
                         </button>
                         <button
                             type="submit" disabled={loading}
                             className={`flex-1 px-4 py-2 text-white font-bold rounded-lg transition-all text-sm shadow-md ${loading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 active:scale-95'}`}
                         >
-                            {loading ? 'Scheduling...' : 'Confirm Appointment'}
+                            {loading ? 'Processing...' : appointmentToEdit ? 'Update Appointment' : 'Confirm Appointment'}
                         </button>
                     </div>
                 </form>
