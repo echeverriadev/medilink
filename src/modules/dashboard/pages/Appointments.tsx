@@ -55,7 +55,7 @@ const Appointments: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleEventClick = (clickInfo: any) => {
+    const handleEventClick = (clickInfo: { event: { extendedProps: any } }) => {
         setSelectedSlot(null);
         setSelectedAppointment(clickInfo.event.extendedProps as Appointment);
         setIsModalOpen(true);

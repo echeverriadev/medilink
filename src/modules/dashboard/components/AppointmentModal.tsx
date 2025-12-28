@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getPatients, PatientData } from '../services/patientService';
-import { createAppointment, updateAppointment, deleteAppointment, Appointment, AppointmentType, APPOINTMENT_COLORS } from '../services/appointmentService';
+import { createAppointment, updateAppointment, deleteAppointment, Appointment, AppointmentType, APPOINTMENT_COLORS, createRecurringAppointments } from '../services/appointmentService';
 import { useAuth } from '../../auth/context/AuthContext';
 import { pushEventToGoogleCalendar, deleteEventFromGoogleCalendar } from '../services/googleCalendarService';
 import { isGoogleConnected } from '../services/googleAuthService';
@@ -26,7 +26,10 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({ isOpen, onClose, on
         description: '',
         date: '',
         startTime: '',
-        endTime: ''
+        endTime: '',
+        isRecurring: false,
+        frequency: 'weekly' as 'daily' | 'weekly' | 'monthly',
+        repetitions: 4
     });
 
     useEffect(() => {
@@ -52,7 +55,10 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({ isOpen, onClose, on
                 description: appointmentToEdit.description,
                 date: dateStr,
                 startTime,
-                endTime
+                endTime,
+                isRecurring: false, // Editing as single instance
+                frequency: 'weekly',
+                repetitions: 4
             });
         } else if (initialStart) {
             const date = new Date(initialStart);
@@ -155,6 +161,9 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({ isOpen, onClose, on
             let savedAppointment: Appointment;
             if (appointmentToEdit?.id) {
                 savedAppointment = await updateAppointment(appointmentToEdit.id, appointmentData);
+            } else if (formData.isRecurring) {
+                const results = await createRecurringAppointments(appointmentData, formData.frequency, formData.repetitions);
+                savedAppointment = results[0]; // For the rest of the flow (GCal sync of first one is handled by createAppointment inside the loop)
             } else {
                 savedAppointment = await createAppointment(appointmentData);
             }
@@ -254,6 +263,49 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({ isOpen, onClose, on
                                     </button>
                                 ))}
                             </div>
+                        </div>
+
+                        <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 space-y-4">
+                            <div className="flex items-center justify-between">
+                                <label className="text-sm font-semibold text-gray-700">Recurring Appointment?</label>
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, isRecurring: !formData.isRecurring })}
+                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${formData.isRecurring ? 'bg-blue-600' : 'bg-gray-300'}`}
+                                >
+                                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.isRecurring ? 'translate-x-6' : 'translate-x-1'}`} />
+                                </button>
+                            </div>
+
+                            {formData.isRecurring && !appointmentToEdit && (
+                                <div className="grid grid-cols-2 gap-4 animate-fadeIn">
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Frequency</label>
+                                        <select
+                                            name="frequency"
+                                            value={formData.frequency}
+                                            onChange={handleChange}
+                                            className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                                        >
+                                            <option value="daily">Daily</option>
+                                            <option value="weekly">Weekly</option>
+                                            <option value="monthly">Monthly</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Repetitions</label>
+                                        <input
+                                            name="repetitions"
+                                            type="number"
+                                            min="2"
+                                            max="24"
+                                            value={formData.repetitions}
+                                            onChange={handleChange}
+                                            className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
