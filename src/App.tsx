@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import MainLayout from './modules/shared/layouts/MainLayout';
 import Dashboard from './modules/dashboard/pages/Dashboard';
 import Patients from './modules/dashboard/pages/Patients';
+import PatientDetail from './modules/dashboard/pages/PatientDetail';
 import LoginPage from './modules/auth/pages/LoginPage';
 import { AuthProvider } from './modules/auth/context/AuthContext';
 import ProtectedRoute from './modules/shared/components/ProtectedRoute';
@@ -26,6 +27,7 @@ function App() {
                         <Route path="dashboard" element={<Dashboard />} />
                         <Route path="appointments" element={<div>Appointments Page</div>} />
                         <Route path="patients" element={<Patients />} />
+                        <Route path="patients/:cedula" element={<PatientDetail />} />
                     </Route>
 
                     {/* Patient Portal - specific role protection */}
