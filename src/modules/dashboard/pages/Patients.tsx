@@ -9,6 +9,7 @@ const Patients: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [patientToEdit, setPatientToEdit] = useState<PatientData | null>(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const fetchPatients = async () => {
         setLoading(true);
@@ -51,22 +52,43 @@ const Patients: React.FC = () => {
         fetchPatients();
     }, []);
 
+    const filteredPatients = patients.filter(patient =>
+        patient.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        patient.cedula.includes(searchTerm)
+    );
+
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-6 rounded-xl shadow-sm border border-gray-100 items-center">
                 <div>
                     <h2 className="text-2xl font-bold text-gray-800">Patients</h2>
                     <p className="text-gray-500 text-sm mt-1">Manage and register your clinic's patients</p>
                 </div>
-                <button
-                    onClick={handleOpenCreateModal}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-all shadow-md active:scale-95"
-                >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    New Patient
-                </button>
+                <div className="flex gap-4">
+                    <div className="relative flex-1 group">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Search by name or ID..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="block w-full pl-10 pr-3 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all text-sm"
+                        />
+                    </div>
+                    <button
+                        onClick={handleOpenCreateModal}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-all shadow-md active:scale-95 whitespace-nowrap"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        New Patient
+                    </button>
+                </div>
             </div>
 
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -94,14 +116,14 @@ const Patients: React.FC = () => {
                                         </div>
                                     </td>
                                 </tr>
-                            ) : patients.length === 0 ? (
+                            ) : filteredPatients.length === 0 ? (
                                 <tr>
                                     <td colSpan={5} className="px-6 py-10 text-center text-gray-500">
-                                        No patients registered yet.
+                                        {searchTerm ? "No results matching your search." : "No patients registered yet."}
                                     </td>
                                 </tr>
                             ) : (
-                                patients.map((patient) => (
+                                filteredPatients.map((patient) => (
                                     <tr key={patient.id} className="hover:bg-blue-50/30 transition-colors">
                                         <td className="px-6 py-4 text-sm font-medium text-blue-600">
                                             {patient.cedula}

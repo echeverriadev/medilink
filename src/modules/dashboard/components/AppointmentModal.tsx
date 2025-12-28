@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getPatients, PatientData } from '../services/patientService';
-import { createAppointment, updateAppointment, Appointment } from '../services/appointmentService';
+import { createAppointment, updateAppointment, deleteAppointment, Appointment } from '../services/appointmentService';
 import { useAuth } from '../../auth/context/AuthContext';
 
 interface AppointmentModalProps {
@@ -86,6 +86,23 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({ isOpen, onClose, on
         } catch (err) {
             const error = err as Error;
             setError(error.message || "Failed to cancel appointment");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!appointmentToEdit?.id) return;
+        if (!window.confirm("Are you sure you want to PERMANENTLY DELETE this appointment? This will free up the slot in your agenda.")) return;
+
+        setLoading(true);
+        try {
+            await deleteAppointment(appointmentToEdit.id);
+            onAppointmentCreated();
+            onClose();
+        } catch (err) {
+            const error = err as Error;
+            setError(error.message || "Failed to delete appointment");
         } finally {
             setLoading(false);
         }
@@ -213,9 +230,17 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({ isOpen, onClose, on
                         {appointmentToEdit && appointmentToEdit.status !== 'cancelled' && (
                             <button
                                 type="button" onClick={handleCancel} disabled={loading}
-                                className="px-4 py-2 bg-red-50 text-red-600 font-bold rounded-lg hover:bg-red-100 transition-all text-sm border border-red-100"
+                                className="px-4 py-2 bg-orange-50 text-orange-600 font-bold rounded-lg hover:bg-orange-100 transition-all text-sm border border-orange-100"
                             >
                                 Cancel Appointment
+                            </button>
+                        )}
+                        {appointmentToEdit && (
+                            <button
+                                type="button" onClick={handleDelete} disabled={loading}
+                                className="px-4 py-2 bg-red-50 text-red-600 font-bold rounded-lg hover:bg-red-100 transition-all text-sm border border-red-100"
+                            >
+                                Delete Permanently
                             </button>
                         )}
                         <button
