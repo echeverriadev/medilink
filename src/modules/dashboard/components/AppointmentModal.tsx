@@ -86,8 +86,9 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({ isOpen, onClose, on
 
             onAppointmentCreated();
             onClose();
-        } catch (err: any) {
-            setError(err.message || "Failed to schedule appointment");
+        } catch (err) {
+            const error = err as Error;
+            setError(error.message || "Failed to schedule appointment");
         } finally {
             setLoading(false);
         }

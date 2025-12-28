@@ -4,16 +4,24 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import AppointmentModal from '../components/AppointmentModal';
-import { getDoctorAppointments, Appointment } from '../services/appointmentService';
+import { getDoctorAppointments } from '../services/appointmentService';
 import { useAuth } from '../../auth/context/AuthContext';
+
+interface CalendarEvent {
+    id?: string;
+    title: string;
+    start: string;
+    end: string;
+    extendedProps?: Record<string, unknown>;
+}
 
 const Appointments: React.FC = () => {
     const { user } = useAuth();
-    const [events, setEvents] = useState<any[]>([]);
+    const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
 
-    const fetchAppointments = async () => {
+    const fetchAppointments = React.useCallback(async () => {
         if (!user) return;
         try {
             const data = await getDoctorAppointments(user.uid);
@@ -32,18 +40,18 @@ const Appointments: React.FC = () => {
         } catch (error) {
             console.error("Error fetching appointments:", error);
         }
-    };
+    }, [user]);
 
     useEffect(() => {
         fetchAppointments();
-    }, [user]);
+    }, [fetchAppointments]);
 
-    const handleDateSelect = (selectInfo: any) => {
+    const handleDateSelect = (selectInfo: { startStr: string }) => {
         setSelectedSlot(selectInfo.startStr);
         setIsModalOpen(true);
     };
 
-    const handleEventClick = (clickInfo: any) => {
+    const handleEventClick = (clickInfo: { event: { title: string; id: string } }) => {
         if (window.confirm(`Are you sure you want to delete the appointment '${clickInfo.event.title}'?`)) {
             // Logic for deletion or viewing details could go here
             console.log("Event clicked:", clickInfo.event.id);

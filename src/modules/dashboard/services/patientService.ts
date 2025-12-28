@@ -52,7 +52,7 @@ export const createPatient = async (data: PatientData, password: string) => {
         await signOut(secondaryAuth);
 
         return { uid, ...data };
-    } catch (error: any) {
+    } catch (error) {
         console.error("Error creating patient:", error);
         throw error;
     }
@@ -66,7 +66,7 @@ export const updatePatient = async (id: string, data: Partial<PatientData>) => {
             updatedAt: new Date().toISOString()
         };
         await updateDoc(patientRef, updateData);
-    } catch (error: any) {
+    } catch (error) {
         console.error("Error updating patient:", error);
         throw error;
     }
@@ -77,7 +77,7 @@ export const deletePatient = async (id: string) => {
         // Note: For now we only delete the Firestore record. 
         // Real deletion from Firebase Auth requires Cloud Functions or Admin SDK.
         await deleteDoc(doc(db, "users", id));
-    } catch (error: any) {
+    } catch (error) {
         console.error("Error deleting patient:", error);
         throw error;
     }
@@ -91,7 +91,7 @@ export const getPatients = async () => {
             id: doc.id,
             ...doc.data()
         })) as PatientData[];
-    } catch (error: any) {
+    } catch (error) {
         console.error("Error fetching patients:", error);
         throw error;
     }
@@ -108,7 +108,7 @@ export const getPatientByCedula = async (cedula: string) => {
             id: doc.id,
             ...doc.data()
         } as PatientData;
-    } catch (error: any) {
+    } catch (error) {
         console.error("Error fetching patient by cedula:", error);
         throw error;
     }

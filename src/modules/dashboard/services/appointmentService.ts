@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, query, where, addDoc, updateDoc, deleteDoc, orderBy } from "firebase/firestore";
+import { collection, doc, getDocs, query, where, addDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../../../config/firebase";
 import emailjs from '@emailjs/browser';
 import { generateGoogleCalendarLink } from "../../shared/utils/calendarUtils";
@@ -62,7 +62,7 @@ export const createAppointment = async (data: Omit<Appointment, 'id' | 'createdA
         }
 
         return { id: docRef.id, ...appointmentData };
-    } catch (error: any) {
+    } catch (error) {
         console.error("Error creating appointment:", error);
         throw error;
     }
@@ -83,7 +83,7 @@ export const getDoctorAppointments = async (doctorId: string) => {
 
         // Sort in memory instead
         return data.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
-    } catch (error: any) {
+    } catch (error) {
         console.error("Error fetching doctor appointments:", error);
         throw error;
     }
@@ -93,15 +93,17 @@ export const getPatientAppointments = async (patientId: string) => {
     try {
         const q = query(
             collection(db, "appointments"),
-            where("patientId", "==", patientId),
-            orderBy("start", "desc")
+            where("patientId", "==", patientId)
         );
         const querySnapshot = await getDocs(q);
-        return querySnapshot.docs.map(doc => ({
+        const data = querySnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
         })) as Appointment[];
-    } catch (error: any) {
+
+        // Sort in memory instead to avoid index requirements
+        return data.sort((a, b) => new Date(b.start).getTime() - new Date(a.start).getTime());
+    } catch (error) {
         console.error("Error fetching patient appointments:", error);
         throw error;
     }
@@ -111,7 +113,7 @@ export const updateAppointment = async (id: string, data: Partial<Appointment>) 
     try {
         const appointmentRef = doc(db, "appointments", id);
         await updateDoc(appointmentRef, data);
-    } catch (error: any) {
+    } catch (error) {
         console.error("Error updating appointment:", error);
         throw error;
     }
@@ -120,7 +122,7 @@ export const updateAppointment = async (id: string, data: Partial<Appointment>) 
 export const deleteAppointment = async (id: string) => {
     try {
         await deleteDoc(doc(db, "appointments", id));
-    } catch (error: any) {
+    } catch (error) {
         console.error("Error deleting appointment:", error);
         throw error;
     }
