@@ -82,8 +82,9 @@ const PatientModal: React.FC<PatientModalProps> = ({ isOpen, onClose, onPatientC
             }
             onPatientCreated();
             onClose();
-        } catch (err: any) {
-            setError(err.message || "Failed to save patient");
+        } catch (err) {
+            const error = err as Error;
+            setError(error.message || "Failed to save patient");
         } finally {
             setLoading(false);
         }

@@ -45,15 +45,18 @@ const LoginPage: React.FC = () => {
             } else {
                 setError('User data not found in registration.');
             }
-        } catch (err: any) {
+        } catch (err) {
             console.error(err);
+            const firebaseError = err as { code?: string; message?: string };
             let errorMessage = 'Failed to sign in. Please check your credentials.';
-            if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+            if (firebaseError.code === 'auth/user-not-found' || firebaseError.code === 'auth/wrong-password') {
                 errorMessage = 'Invalid email or password.';
-            } else if (err.code === 'auth/invalid-email') {
+            } else if (firebaseError.code === 'auth/invalid-email') {
                 errorMessage = 'The email address is not valid.';
-            } else if (err.code === 'auth/too-many-requests') {
+            } else if (firebaseError.code === 'auth/too-many-requests') {
                 errorMessage = 'Too many failed login attempts. Please try again later.';
+            } else {
+                errorMessage = firebaseError.message || 'An unexpected error occurred during sign-in.';
             }
             setError(errorMessage);
         } finally {
