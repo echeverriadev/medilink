@@ -1,6 +1,6 @@
 import { initializeApp, getApp, getApps } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signOut } from "firebase/auth";
-import { collection, doc, setDoc, getDocs, query, where } from "firebase/firestore";
+import { collection, doc, setDoc, getDocs, query, where, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../../../config/firebase";
 
 // Secondary Firebase app to create users without changing the current session
@@ -21,10 +21,13 @@ export interface PatientData {
     id?: string;
     fullName: string;
     email: string;
+    cedula: string;
     phone: string;
     address: string;
     birthDate: string;
     role: 'PATIENT';
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export const createPatient = async (data: PatientData, password: string) => {
@@ -37,6 +40,7 @@ export const createPatient = async (data: PatientData, password: string) => {
         await setDoc(doc(db, "users", uid), {
             fullName: data.fullName,
             email: data.email,
+            cedula: data.cedula,
             phone: data.phone,
             address: data.address,
             birthDate: data.birthDate,
@@ -54,6 +58,31 @@ export const createPatient = async (data: PatientData, password: string) => {
     }
 };
 
+export const updatePatient = async (id: string, data: Partial<PatientData>) => {
+    try {
+        const patientRef = doc(db, "users", id);
+        const updateData = {
+            ...data,
+            updatedAt: new Date().toISOString()
+        };
+        await updateDoc(patientRef, updateData);
+    } catch (error: any) {
+        console.error("Error updating patient:", error);
+        throw error;
+    }
+};
+
+export const deletePatient = async (id: string) => {
+    try {
+        // Note: For now we only delete the Firestore record. 
+        // Real deletion from Firebase Auth requires Cloud Functions or Admin SDK.
+        await deleteDoc(doc(db, "users", id));
+    } catch (error: any) {
+        console.error("Error deleting patient:", error);
+        throw error;
+    }
+};
+
 export const getPatients = async () => {
     try {
         const q = query(collection(db, "users"), where("role", "==", "PATIENT"));
@@ -64,6 +93,23 @@ export const getPatients = async () => {
         })) as PatientData[];
     } catch (error: any) {
         console.error("Error fetching patients:", error);
+        throw error;
+    }
+};
+
+export const getPatientByCedula = async (cedula: string) => {
+    try {
+        const q = query(collection(db, "users"), where("cedula", "==", cedula), where("role", "==", "PATIENT"));
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) return null;
+
+        const doc = querySnapshot.docs[0];
+        return {
+            id: doc.id,
+            ...doc.data()
+        } as PatientData;
+    } catch (error: any) {
+        console.error("Error fetching patient by cedula:", error);
         throw error;
     }
 };

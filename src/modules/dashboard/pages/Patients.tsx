@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PatientModal from '../components/PatientModal';
-import { getPatients, PatientData } from '../services/patientService';
+import { getPatients, deletePatient, PatientData } from '../services/patientService';
 
 const Patients: React.FC = () => {
+    const navigate = useNavigate();
     const [patients, setPatients] = useState<PatientData[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [patientToEdit, setPatientToEdit] = useState<PatientData | null>(null);
 
     const fetchPatients = async () => {
         setLoading(true);
@@ -17,6 +20,31 @@ const Patients: React.FC = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleDelete = async (id: string) => {
+        if (window.confirm("Are you sure you want to delete this patient record? This action only removes the clinical record, not the authentication account.")) {
+            try {
+                await deletePatient(id);
+                fetchPatients();
+            } catch (error) {
+                alert("Failed to delete patient");
+            }
+        }
+    };
+
+    const handleEdit = (patient: PatientData) => {
+        setPatientToEdit(patient);
+        setIsModalOpen(true);
+    };
+
+    const handleOpenCreateModal = () => {
+        setPatientToEdit(null);
+        setIsModalOpen(true);
+    };
+
+    const handleViewDetails = (cedula: string) => {
+        navigate(`/patients/${cedula}`);
     };
 
     useEffect(() => {
@@ -31,7 +59,7 @@ const Patients: React.FC = () => {
                     <p className="text-gray-500 text-sm mt-1">Manage and register your clinic's patients</p>
                 </div>
                 <button
-                    onClick={() => setIsModalOpen(true)}
+                    onClick={handleOpenCreateModal}
                     className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-all shadow-md active:scale-95"
                 >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -41,23 +69,16 @@ const Patients: React.FC = () => {
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-                    <p className="text-gray-500 text-xs font-bold uppercase tracking-wider">Total Patients</p>
-                    <p className="text-2xl font-bold text-gray-800 mt-2">{patients.length}</p>
-                </div>
-            </div>
-
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead className="bg-gray-50 border-b border-gray-100">
                             <tr>
+                                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">National ID</th>
                                 <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Name</th>
                                 <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Contact</th>
-                                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Date of Birth</th>
-                                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Address</th>
-                                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
+                                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Phone</th>
+                                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
@@ -82,21 +103,47 @@ const Patients: React.FC = () => {
                             ) : (
                                 patients.map((patient) => (
                                     <tr key={patient.id} className="hover:bg-blue-50/30 transition-colors">
+                                        <td className="px-6 py-4 text-sm font-medium text-blue-600">
+                                            {patient.cedula}
+                                        </td>
                                         <td className="px-6 py-4">
                                             <div className="font-bold text-gray-800">{patient.fullName}</div>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="text-sm text-gray-600">{patient.email}</div>
-                                            <div className="text-xs text-gray-400 font-medium">{patient.phone}</div>
                                         </td>
                                         <td className="px-6 py-4 text-sm text-gray-600">
-                                            {patient.birthDate}
+                                            {patient.phone}
                                         </td>
-                                        <td className="px-6 py-4 text-sm text-gray-600 truncate max-w-[200px]">
-                                            {patient.address}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <button className="text-blue-600 hover:text-blue-800 font-bold text-sm">Details</button>
+                                        <td className="px-6 py-4 text-right space-x-2">
+                                            <button
+                                                onClick={() => handleViewDetails(patient.cedula)}
+                                                className="text-gray-500 hover:text-blue-600 transition-colors"
+                                                title="View Details"
+                                            >
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                            </button>
+                                            <button
+                                                onClick={() => handleEdit(patient)}
+                                                className="text-gray-500 hover:text-orange-600 transition-colors"
+                                                title="Edit"
+                                            >
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                </svg>
+                                            </button>
+                                            <button
+                                                onClick={() => patient.id && handleDelete(patient.id)}
+                                                className="text-gray-500 hover:text-red-600 transition-colors"
+                                                title="Delete"
+                                            >
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
                                         </td>
                                     </tr>
                                 ))
@@ -110,6 +157,7 @@ const Patients: React.FC = () => {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onPatientCreated={fetchPatients}
+                patientToEdit={patientToEdit}
             />
         </div>
     );

@@ -1,23 +1,49 @@
-import React, { useState } from 'react';
-import { createPatient, PatientData } from '../services/patientService';
+import React, { useState, useEffect } from 'react';
+import { createPatient, updatePatient, PatientData } from '../services/patientService';
 
 interface PatientModalProps {
     isOpen: boolean;
     onClose: () => void;
     onPatientCreated: () => void;
+    patientToEdit?: PatientData | null;
 }
 
-const PatientModal: React.FC<PatientModalProps> = ({ isOpen, onClose, onPatientCreated }) => {
+const PatientModal: React.FC<PatientModalProps> = ({ isOpen, onClose, onPatientCreated, patientToEdit }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         fullName: '',
         email: '',
         password: '',
+        cedula: '',
         phone: '',
         address: '',
         birthDate: ''
     });
+
+    useEffect(() => {
+        if (patientToEdit) {
+            setFormData({
+                fullName: patientToEdit.fullName,
+                email: patientToEdit.email,
+                password: '', // Password is not editable
+                cedula: patientToEdit.cedula,
+                phone: patientToEdit.phone,
+                address: patientToEdit.address,
+                birthDate: patientToEdit.birthDate
+            });
+        } else {
+            setFormData({
+                fullName: '',
+                email: '',
+                password: '',
+                cedula: '',
+                phone: '',
+                address: '',
+                birthDate: ''
+            });
+        }
+    }, [patientToEdit, isOpen]);
 
     if (!isOpen) return null;
 
@@ -31,21 +57,33 @@ const PatientModal: React.FC<PatientModalProps> = ({ isOpen, onClose, onPatientC
         setError(null);
 
         try {
-            const patientData: PatientData = {
-                fullName: formData.fullName,
-                email: formData.email,
-                phone: formData.phone,
-                address: formData.address,
-                birthDate: formData.birthDate,
-                role: 'PATIENT'
-            };
-
-            await createPatient(patientData, formData.password);
+            if (patientToEdit && patientToEdit.id) {
+                // Update mode
+                const updateData: Partial<PatientData> = {
+                    fullName: formData.fullName,
+                    cedula: formData.cedula,
+                    phone: formData.phone,
+                    address: formData.address,
+                    birthDate: formData.birthDate,
+                };
+                await updatePatient(patientToEdit.id, updateData);
+            } else {
+                // Create mode
+                const patientData: PatientData = {
+                    fullName: formData.fullName,
+                    email: formData.email,
+                    cedula: formData.cedula,
+                    phone: formData.phone,
+                    address: formData.address,
+                    birthDate: formData.birthDate,
+                    role: 'PATIENT'
+                };
+                await createPatient(patientData, formData.password);
+            }
             onPatientCreated();
             onClose();
-            setFormData({ fullName: '', email: '', password: '', phone: '', address: '', birthDate: '' });
         } catch (err: any) {
-            setError(err.message || "Failed to create patient");
+            setError(err.message || "Failed to save patient");
         } finally {
             setLoading(false);
         }
@@ -55,7 +93,9 @@ const PatientModal: React.FC<PatientModalProps> = ({ isOpen, onClose, onPatientC
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-100">
                 <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-blue-50">
-                    <h3 className="text-xl font-bold text-blue-800">New Patient Registration</h3>
+                    <h3 className="text-xl font-bold text-blue-800">
+                        {patientToEdit ? 'Edit Patient' : 'New Patient Registration'}
+                    </h3>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -82,17 +122,29 @@ const PatientModal: React.FC<PatientModalProps> = ({ isOpen, onClose, onPatientC
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
                             <input
-                                name="email" type="email" required value={formData.email} onChange={handleChange}
-                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                name="email" type="email" required disabled={!!patientToEdit}
+                                value={formData.email} onChange={handleChange}
+                                className={`w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${patientToEdit ? 'bg-gray-100 cursor-not-allowed' : 'bg-gray-50'}`}
                                 placeholder="john@example.com"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">Temp Password</label>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">
+                                {patientToEdit ? 'Password (Fixed)' : 'Temp Password'}
+                            </label>
                             <input
-                                name="password" type="password" required value={formData.password} onChange={handleChange}
+                                name="password" type="password" required={!patientToEdit} disabled={!!patientToEdit}
+                                value={formData.password} onChange={handleChange}
+                                className={`w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${patientToEdit ? 'bg-gray-100 cursor-not-allowed' : 'bg-gray-50'}`}
+                                placeholder={patientToEdit ? '••••••••' : '••••••••'}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">National ID (Cédula)</label>
+                            <input
+                                name="cedula" required value={formData.cedula} onChange={handleChange}
                                 className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                                placeholder="••••••••"
+                                placeholder="1234567890"
                             />
                         </div>
                         <div>
@@ -109,6 +161,9 @@ const PatientModal: React.FC<PatientModalProps> = ({ isOpen, onClose, onPatientC
                                 name="birthDate" type="date" required value={formData.birthDate} onChange={handleChange}
                                 className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                             />
+                        </div>
+                        <div className="md:col-span-1">
+                            {/* Empty space for grid alignment or more fields */}
                         </div>
                         <div className="col-span-2">
                             <label className="block text-sm font-semibold text-gray-700 mb-1">Full Address</label>
@@ -131,7 +186,7 @@ const PatientModal: React.FC<PatientModalProps> = ({ isOpen, onClose, onPatientC
                             type="submit" disabled={loading}
                             className={`flex-1 px-4 py-2 text-white font-bold rounded-lg transition-all text-sm shadow-md ${loading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 active:scale-95'}`}
                         >
-                            {loading ? 'Creating...' : 'Register Patient'}
+                            {loading ? 'Saving...' : (patientToEdit ? 'Update Patient' : 'Register Patient')}
                         </button>
                     </div>
                 </form>
