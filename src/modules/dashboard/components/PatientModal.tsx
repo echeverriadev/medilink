@@ -12,7 +12,8 @@ const PatientModal: React.FC<PatientModalProps> = ({ isOpen, onClose, onPatientC
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
-        fullName: '',
+        firstName: '',
+        lastName: '',
         email: '',
         password: '',
         cedula: '',
@@ -24,7 +25,8 @@ const PatientModal: React.FC<PatientModalProps> = ({ isOpen, onClose, onPatientC
     useEffect(() => {
         if (patientToEdit) {
             setFormData({
-                fullName: patientToEdit.fullName,
+                firstName: patientToEdit.firstName || '',
+                lastName: patientToEdit.lastName || '',
                 email: patientToEdit.email,
                 password: '', // Password is not editable
                 cedula: patientToEdit.cedula,
@@ -34,7 +36,8 @@ const PatientModal: React.FC<PatientModalProps> = ({ isOpen, onClose, onPatientC
             });
         } else {
             setFormData({
-                fullName: '',
+                firstName: '',
+                lastName: '',
                 email: '',
                 password: '',
                 cedula: '',
@@ -60,7 +63,9 @@ const PatientModal: React.FC<PatientModalProps> = ({ isOpen, onClose, onPatientC
             if (patientToEdit && patientToEdit.id) {
                 // Update mode
                 const updateData: Partial<PatientData> = {
-                    fullName: formData.fullName,
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                    fullName: `${formData.firstName} ${formData.lastName}`,
                     cedula: formData.cedula,
                     phone: formData.phone,
                     address: formData.address,
@@ -70,7 +75,9 @@ const PatientModal: React.FC<PatientModalProps> = ({ isOpen, onClose, onPatientC
             } else {
                 // Create mode
                 const patientData: PatientData = {
-                    fullName: formData.fullName,
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                    fullName: `${formData.firstName} ${formData.lastName}`,
                     email: formData.email,
                     cedula: formData.cedula,
                     phone: formData.phone,
@@ -112,12 +119,20 @@ const PatientModal: React.FC<PatientModalProps> = ({ isOpen, onClose, onPatientC
                     )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="col-span-2">
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">Full Name</label>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">First Name</label>
                             <input
-                                name="fullName" required value={formData.fullName} onChange={handleChange}
+                                name="firstName" required value={formData.firstName} onChange={handleChange}
                                 className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                                placeholder="E.g. John Doe"
+                                placeholder="E.g. John"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">Last Name</label>
+                            <input
+                                name="lastName" required value={formData.lastName} onChange={handleChange}
+                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                placeholder="E.g. Doe"
                             />
                         </div>
                         <div>

@@ -3,6 +3,7 @@ import { useAuth } from '../../auth/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { getDoctorAppointments, Appointment } from '../services/appointmentService';
 import { getPatients } from '../services/patientService';
+import { initiateGoogleLogin, handleGoogleRedirect, isGoogleConnected, disconnectGoogle } from '../services/googleAuthService';
 
 const Dashboard: React.FC = () => {
     const { user } = useAuth();
@@ -16,6 +17,16 @@ const Dashboard: React.FC = () => {
     });
     const [upcomingAppointments, setUpcomingAppointments] = useState<Appointment[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isCalendarConnected, setIsCalendarConnected] = useState(false);
+
+    useEffect(() => {
+        // Handle Google OAuth redirect
+        if (handleGoogleRedirect()) {
+            setIsCalendarConnected(true);
+        } else {
+            setIsCalendarConnected(isGoogleConnected());
+        }
+    }, []);
 
     useEffect(() => {
         const fetchDashboardData = async () => {
@@ -70,12 +81,43 @@ const Dashboard: React.FC = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <div>
-                    <h2 className="text-2xl font-bold text-gray-800">Dashboard</h2>
-                    <p className="text-gray-500 text-sm mt-1">Welcome back, Dr. {user?.displayName || 'Specialist'}</p>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                    <div>
+                        <h2 className="text-2xl font-bold text-gray-800">Dashboard</h2>
+                        <p className="text-gray-500 text-sm mt-1">Welcome back, Dr. {user?.displayName || 'Specialist'}</p>
+                    </div>
+
+                    {/* Google Calendar Connection Indicator */}
+                    <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full shadow-sm border border-gray-100 ml-4">
+                        <div className={`w-2.5 h-2.5 rounded-full ${isCalendarConnected ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-gray-300'}`}></div>
+                        <span className="text-[11px] font-bold text-gray-600 uppercase tracking-tight">
+                            {isCalendarConnected ? 'Calendar Synced' : 'Sync Personal Calendar'}
+                        </span>
+                        {isCalendarConnected ? (
+                            <button
+                                onClick={() => { disconnectGoogle(); setIsCalendarConnected(false); }}
+                                className="ml-1 p-1 text-gray-400 hover:text-red-500 transition-colors"
+                                title="Disconnect Calendar"
+                            >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                            </button>
+                        ) : (
+                            <button
+                                onClick={initiateGoogleLogin}
+                                className="ml-1 px-2.5 py-1 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-all text-[10px] font-black uppercase"
+                            >
+                                Sync
+                            </button>
+                        )}
+                    </div>
                 </div>
-                <button className="px-5 py-2.5 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-all shadow-md active:scale-95">
+                <button
+                    onClick={() => navigate('/appointments')}
+                    className="px-5 py-2.5 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-all shadow-md active:scale-95"
+                >
                     New Appointment
                 </button>
             </div>

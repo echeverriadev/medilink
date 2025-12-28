@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PatientModal from '../components/PatientModal';
 import { getPatients, deletePatient, PatientData } from '../services/patientService';
+import { calculateAge } from '../../shared/utils/dateUtils';
 
 const Patients: React.FC = () => {
     const navigate = useNavigate();
@@ -99,6 +100,7 @@ const Patients: React.FC = () => {
                                 <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">National ID</th>
                                 <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Name</th>
                                 <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Contact</th>
+                                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Age</th>
                                 <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Phone</th>
                                 <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
                             </tr>
@@ -133,6 +135,9 @@ const Patients: React.FC = () => {
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="text-sm text-gray-600">{patient.email}</div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="text-sm text-gray-800 font-medium">{calculateAge(patient.birthDate)}</div>
                                         </td>
                                         <td className="px-6 py-4 text-sm text-gray-600">
                                             {patient.phone}

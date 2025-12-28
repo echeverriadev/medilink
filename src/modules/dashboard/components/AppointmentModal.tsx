@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { getPatients, PatientData } from '../services/patientService';
 import { createAppointment, updateAppointment, deleteAppointment, Appointment } from '../services/appointmentService';
 import { useAuth } from '../../auth/context/AuthContext';
+import { pushEventToGoogleCalendar, deleteEventFromGoogleCalendar } from '../services/googleCalendarService';
+import { isGoogleConnected } from '../services/googleAuthService';
 
 interface AppointmentModalProps {
     isOpen: boolean;
@@ -81,6 +83,12 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({ isOpen, onClose, on
         setLoading(true);
         try {
             await updateAppointment(appointmentToEdit.id, { status: 'cancelled' });
+
+            // Sync removal from Google Calendar if connected
+            if (isGoogleConnected() && appointmentToEdit.googleEventId) {
+                await deleteEventFromGoogleCalendar(appointmentToEdit.googleEventId);
+            }
+
             onAppointmentCreated();
             onClose();
         } catch (err) {
@@ -97,6 +105,11 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({ isOpen, onClose, on
 
         setLoading(true);
         try {
+            // Delete from Google Calendar first if connected
+            if (isGoogleConnected() && appointmentToEdit.googleEventId) {
+                await deleteEventFromGoogleCalendar(appointmentToEdit.googleEventId);
+            }
+
             await deleteAppointment(appointmentToEdit.id);
             onAppointmentCreated();
             onClose();
@@ -127,6 +140,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({ isOpen, onClose, on
                 patientName: selectedPatient.fullName,
                 patientEmail: selectedPatient.email,
                 doctorId: user.uid,
+                doctorEmail: user.email || '',
                 title: formData.title || `Consultation with ${selectedPatient.fullName}`,
                 start: startISO,
                 end: endISO,
@@ -134,10 +148,31 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({ isOpen, onClose, on
                 status: (appointmentToEdit?.status || 'confirmed') as 'confirmed' | 'cancelled' | 'scheduled' | 'completed'
             };
 
+            let savedAppointment: Appointment;
             if (appointmentToEdit?.id) {
-                await updateAppointment(appointmentToEdit.id, appointmentData);
+                savedAppointment = await updateAppointment(appointmentToEdit.id, appointmentData);
             } else {
-                await createAppointment(appointmentData);
+                savedAppointment = await createAppointment(appointmentData);
+            }
+
+            // Automatic push/update to Google Calendar if connected
+            if (isGoogleConnected()) {
+                try {
+                    // Include the existing googleEventId if updating
+                    const appointmentWithGoogleId = {
+                        ...savedAppointment,
+                        googleEventId: appointmentToEdit?.googleEventId || savedAppointment.googleEventId
+                    };
+
+                    const googleEventId = await pushEventToGoogleCalendar(appointmentWithGoogleId);
+
+                    // If it's a new event or the ID changed, update Firestore
+                    if (googleEventId && googleEventId !== appointmentToEdit?.googleEventId) {
+                        await updateAppointment(savedAppointment.id!, { googleEventId });
+                    }
+                } catch (syncError) {
+                    console.error("Failed to sync with Google Calendar:", syncError);
+                }
             }
 
             onAppointmentCreated();
