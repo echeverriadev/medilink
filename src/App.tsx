@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from './modules/shared/layouts/MainLayout';
 import Dashboard from './modules/dashboard/pages/Dashboard';
+import Patients from './modules/dashboard/pages/Patients';
 import LoginPage from './modules/auth/pages/LoginPage';
 import { AuthProvider } from './modules/auth/context/AuthContext';
 import ProtectedRoute from './modules/shared/components/ProtectedRoute';
@@ -24,7 +25,7 @@ function App() {
                         <Route index element={<Navigate to="/dashboard" replace />} />
                         <Route path="dashboard" element={<Dashboard />} />
                         <Route path="appointments" element={<div>Appointments Page</div>} />
-                        <Route path="patients" element={<div>Patients Page</div>} />
+                        <Route path="patients" element={<Patients />} />
                     </Route>
 
                     {/* Patient Portal - specific role protection */}
