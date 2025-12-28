@@ -53,7 +53,6 @@ export const pushEventToGoogleCalendar = async (appointment: Appointment) => {
         }
 
         const data = await response.json();
-        console.log(`Event ${appointment.googleEventId ? 'updated' : 'pushed'} to Google Calendar successfully`);
         return data.id; // Return the Google Event ID
     } catch (error) {
         console.error('Error syncing with Google Calendar:', error);
@@ -78,7 +77,6 @@ export const deleteEventFromGoogleCalendar = async (googleEventId: string) => {
             throw new Error(errorData.error?.message || 'Failed to delete event from Google Calendar');
         }
 
-        console.log('Event deleted from Google Calendar');
     } catch (error) {
         console.error('Error deleting event from Google Calendar:', error);
     }
