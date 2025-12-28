@@ -8,7 +8,9 @@ const Dashboard: React.FC = () => {
     const [stats, setStats] = useState({
         totalPatients: 0,
         appointmentsToday: 0,
-        upcomingToday: 0
+        upcomingToday: 0,
+        cancelledCount: 0,
+        cancelledPercentage: 0
     });
     const [upcomingAppointments, setUpcomingAppointments] = useState<Appointment[]>([]);
     const [loading, setLoading] = useState(true);
@@ -33,10 +35,16 @@ const Dashboard: React.FC = () => {
                     new Date(apt.start) > now && apt.status !== 'cancelled'
                 ).sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
 
+                const cancelledCount = appointments.filter(apt => apt.status === 'cancelled').length;
+                const totalApts = appointments.length;
+                const cancelledPercentage = totalApts > 0 ? (cancelledCount / totalApts) * 100 : 0;
+
                 setStats({
                     totalPatients: patients.length,
                     appointmentsToday: todayAppointments.length,
-                    upcomingToday: upcoming.length
+                    upcomingToday: upcoming.length,
+                    cancelledCount,
+                    cancelledPercentage
                 });
 
                 setUpcomingAppointments(upcoming);
@@ -109,17 +117,17 @@ const Dashboard: React.FC = () => {
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                     <div className="flex justify-between items-start">
                         <div>
-                            <h3 className="text-gray-500 text-sm font-medium uppercase tracking-wider">Pending Results</h3>
-                            <p className="text-3xl font-bold text-gray-900 mt-2">0</p>
+                            <h3 className="text-gray-500 text-sm font-medium uppercase tracking-wider">Cancelled Appointments</h3>
+                            <p className="text-3xl font-bold text-gray-900 mt-2">{stats.cancelledCount}</p>
                         </div>
-                        <div className="p-2 bg-orange-50 rounded-lg text-orange-600">
+                        <div className="p-2 bg-red-50 rounded-lg text-red-600">
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
                     </div>
-                    <div className="mt-4 flex items-center text-gray-400 text-sm font-medium">
-                        <span>Up to date</span>
+                    <div className="mt-4 flex items-center text-red-600 text-sm font-medium">
+                        <span>{stats.cancelledPercentage.toFixed(1)}% of total</span>
                     </div>
                 </div>
             </div>
