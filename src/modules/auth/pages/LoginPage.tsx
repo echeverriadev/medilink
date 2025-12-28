@@ -1,22 +1,64 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '../../../config/firebase';
 import loginBg from '../../../assets/login-bg.png';
 
 const LoginPage: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+        setError(null);
 
-        // Mock authentication delay
-        setTimeout(() => {
+        try {
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            // Fetch user role from Firestore to determine where to redirect
+            const userDoc = await getDoc(doc(db, 'users', user.uid));
+
+            if (userDoc.exists()) {
+                const role = userDoc.data().role;
+
+                // Redirect based on role
+                switch (role) {
+                    case 'DOCTOR':
+                    case 'ADMIN':
+                        navigate('/dashboard');
+                        break;
+                    case 'PATIENT':
+                        navigate('/patient-portal');
+                        break;
+                    case 'SECRETARY':
+                        navigate('/appointments');
+                        break;
+                    default:
+                        navigate('/dashboard');
+                }
+            } else {
+                setError('User data not found in registration.');
+            }
+        } catch (err: any) {
+            console.error(err);
+            let errorMessage = 'Failed to sign in. Please check your credentials.';
+            if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+                errorMessage = 'Invalid email or password.';
+            } else if (err.code === 'auth/invalid-email') {
+                errorMessage = 'The email address is not valid.';
+            } else if (err.code === 'auth/too-many-requests') {
+                errorMessage = 'Too many failed login attempts. Please try again later.';
+            }
+            setError(errorMessage);
+        } finally {
             setLoading(false);
-            navigate('/dashboard');
-        }, 1000);
+        }
     };
 
     return (
@@ -27,12 +69,28 @@ const LoginPage: React.FC = () => {
                         MediLink
                     </h1>
                     <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-                        Doctor Sign In
+                        Sign In
                     </h2>
                     <p className="mt-2 text-center text-sm text-gray-600">
                         Enter your credentials to access your portal
                     </p>
                 </div>
+
+                {error && (
+                    <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
+                        <div className="flex">
+                            <div className="flex-shrink-0">
+                                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                </svg>
+                            </div>
+                            <div className="ml-3">
+                                <p className="text-sm text-red-700">{error}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                     <div className="rounded-md shadow-sm -space-y-px">
                         <div className="mb-4">
@@ -46,7 +104,7 @@ const LoginPage: React.FC = () => {
                                 autoComplete="email"
                                 required
                                 className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-all shadow-sm hover:border-blue-400"
-                                placeholder="doctor@medilink.com"
+                                placeholder="name@email.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />

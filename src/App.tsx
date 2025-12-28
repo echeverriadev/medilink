@@ -2,19 +2,45 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import MainLayout from './modules/shared/layouts/MainLayout';
 import Dashboard from './modules/dashboard/pages/Dashboard';
 import LoginPage from './modules/auth/pages/LoginPage';
+import { AuthProvider } from './modules/auth/context/AuthContext';
+import ProtectedRoute from './modules/shared/components/ProtectedRoute';
 
 function App() {
     return (
-        <Router>
-            <Routes>
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/" element={<MainLayout />}>
-                    <Route index element={<Navigate to="/login" replace />} />
-                    <Route path="dashboard" element={<Dashboard />} />
+        <AuthProvider>
+            <Router>
+                <Routes>
+                    <Route path="/login" element={<LoginPage />} />
+
+                    {/* Protected Routes */}
+                    <Route
+                        path="/"
+                        element={
+                            <ProtectedRoute allowedRoles={['DOCTOR', 'ADMIN', 'SECRETARY']}>
+                                <MainLayout />
+                            </ProtectedRoute>
+                        }
+                    >
+                        <Route index element={<Navigate to="/dashboard" replace />} />
+                        <Route path="dashboard" element={<Dashboard />} />
+                        <Route path="appointments" element={<div>Appointments Page</div>} />
+                        <Route path="patients" element={<div>Patients Page</div>} />
+                    </Route>
+
+                    {/* Patient Portal - specific role protection */}
+                    <Route
+                        path="/patient-portal"
+                        element={
+                            <ProtectedRoute allowedRoles={['PATIENT']}>
+                                <div>Patient Portal</div>
+                            </ProtectedRoute>
+                        }
+                    />
+
                     <Route path="*" element={<div>Not Found</div>} />
-                </Route>
-            </Routes>
-        </Router>
+                </Routes>
+            </Router>
+        </AuthProvider>
     );
 }
 
