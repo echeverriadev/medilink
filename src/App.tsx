@@ -4,12 +4,13 @@ import Dashboard from './modules/dashboard/pages/Dashboard';
 import Patients from './modules/dashboard/pages/Patients';
 import PatientDetail from './modules/dashboard/pages/PatientDetail';
 import Appointments from './modules/dashboard/pages/Appointments';
-import ConsultationPage from './modules/dashboard/pages/ConsultationPage';
 import PatientPortalLayout from './modules/patient-portal/layouts/PatientPortalLayout';
 import PatientAppointments from './modules/patient-portal/pages/PatientAppointments';
 import LoginPage from './modules/auth/pages/LoginPage';
+import AppointmentConfirmation from './modules/patient-portal/pages/AppointmentConfirmation';
 import { AuthProvider } from './modules/auth/context/AuthContext';
 import ProtectedRoute from './modules/shared/components/ProtectedRoute';
+import ConsultationPage from './modules/dashboard/pages/ConsultationPage';
 
 function App() {
     return (
@@ -17,6 +18,7 @@ function App() {
             <Router>
                 <Routes>
                     <Route path="/login" element={<LoginPage />} />
+                    <Route path="/confirm-appointment/:id" element={<AppointmentConfirmation />} />
 
                     {/* Protected Routes */}
                     <Route
