@@ -19,6 +19,8 @@ const secondaryAuth = getAuth(secondaryApp);
 
 export interface PatientData {
     id?: string;
+    firstName: string;
+    lastName: string;
     fullName: string;
     email: string;
     cedula: string;
@@ -38,7 +40,9 @@ export const createPatient = async (data: PatientData, password: string) => {
 
         // 2. Add metadata to Firestore users collection
         await setDoc(doc(db, "users", uid), {
-            fullName: data.fullName,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            fullName: `${data.firstName} ${data.lastName}`,
             email: data.email,
             cedula: data.cedula,
             phone: data.phone,

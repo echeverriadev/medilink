@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, query, where, addDoc, updateDoc, deleteDoc } from "firebase/firestore";
+import { collection, doc, getDocs, getDoc, query, where, addDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../../../config/firebase";
 import emailjs from '@emailjs/browser';
 import { generateGoogleCalendarLink } from "../../shared/utils/calendarUtils";
@@ -12,13 +12,15 @@ export interface Appointment {
     id?: string;
     patientId: string;
     patientName: string;
-    patientEmail: string; // Added to support notifications
+    patientEmail: string;
     doctorId: string;
-    title: string; // For FullCalendar
-    start: string; // ISO string
-    end: string; // ISO string
+    doctorEmail: string; // Added to support doctor notifications/sync
+    title: string;
+    start: string;
+    end: string;
     description: string;
     status: 'scheduled' | 'confirmed' | 'cancelled' | 'completed';
+    googleEventId?: string;
     createdAt: string;
 }
 
@@ -30,12 +32,12 @@ export const createAppointment = async (data: Omit<Appointment, 'id' | 'createdA
         };
         const docRef = await addDoc(collection(db, "appointments"), appointmentData);
 
-        // EmailJS logic for free tier notifications
         const googleLink = generateGoogleCalendarLink(data.title, data.description, data.start, data.end);
 
         const templateParams = {
             patient_name: data.patientName,
             patient_email: data.patientEmail,
+            notification_emails: data.patientEmail, // Send only to patient
             appointment_title: data.title,
             appointment_date: new Date(data.start).toLocaleDateString(),
             appointment_time: new Date(data.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -51,14 +53,14 @@ export const createAppointment = async (data: Omit<Appointment, 'id' | 'createdA
                 EMAILJS_PUBLIC_KEY
             ).then(
                 (response) => {
-                    console.log('Email successfully sent!', response.status, response.text);
+                    console.log('Emails successfully sent!', response.status, response.text);
                 },
                 (err) => {
-                    console.error('Failed to send email:', err);
+                    console.error('Failed to send emails:', err);
                 }
             );
         } else {
-            console.warn('EmailJS credentials not found in .env. Email skipped.');
+            console.warn('EmailJS credentials not found in .env. Emails skipped.');
         }
 
         return { id: docRef.id, ...appointmentData };
@@ -109,10 +111,14 @@ export const getPatientAppointments = async (patientId: string) => {
     }
 };
 
-export const updateAppointment = async (id: string, data: Partial<Appointment>) => {
+export const updateAppointment = async (id: string, data: Partial<Appointment>): Promise<Appointment> => {
     try {
         const appointmentRef = doc(db, "appointments", id);
         await updateDoc(appointmentRef, data);
+
+        // Fetch the full updated document to return it
+        const updatedDoc = await getDoc(appointmentRef);
+        return { id: updatedDoc.id, ...updatedDoc.data() } as Appointment;
     } catch (error) {
         console.error("Error updating appointment:", error);
         throw error;
