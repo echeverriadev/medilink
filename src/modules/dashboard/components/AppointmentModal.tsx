@@ -159,33 +159,37 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({ isOpen, onClose, on
                 status: (appointmentToEdit?.status || 'confirmed') as 'confirmed' | 'cancelled' | 'scheduled' | 'completed'
             };
 
-            let savedAppointment: Appointment;
+            let appointmentsToSync: Appointment[] = [];
+
             if (appointmentToEdit?.id) {
-                savedAppointment = await updateAppointment(appointmentToEdit.id, appointmentData);
+                const updated = await updateAppointment(appointmentToEdit.id, appointmentData);
+                appointmentsToSync = [updated];
             } else if (formData.isRecurring) {
-                const results = await createRecurringAppointments(appointmentData, formData.frequency, formData.repetitions);
-                savedAppointment = results[0]; // For the rest of the flow (GCal sync of first one is handled by createAppointment inside the loop)
+                appointmentsToSync = await createRecurringAppointments(appointmentData, formData.frequency, formData.repetitions);
             } else {
-                savedAppointment = await createAppointment(appointmentData);
+                const created = await createAppointment(appointmentData);
+                appointmentsToSync = [created];
             }
 
             // Automatic push/update to Google Calendar if connected
             if (isGoogleConnected()) {
-                try {
-                    // Include the existing googleEventId if updating
-                    const appointmentWithGoogleId = {
-                        ...savedAppointment,
-                        googleEventId: appointmentToEdit?.googleEventId || savedAppointment.googleEventId
-                    };
+                for (const apt of appointmentsToSync) {
+                    try {
+                        // Include the existing googleEventId if updating
+                        const appointmentWithGoogleId = {
+                            ...apt,
+                            googleEventId: appointmentToEdit?.googleEventId || apt.googleEventId
+                        };
 
-                    const googleEventId = await pushEventToGoogleCalendar(appointmentWithGoogleId);
+                        const googleEventId = await pushEventToGoogleCalendar(appointmentWithGoogleId);
 
-                    // If it's a new event or the ID changed, update Firestore
-                    if (googleEventId && googleEventId !== appointmentToEdit?.googleEventId) {
-                        await updateAppointment(savedAppointment.id!, { googleEventId });
+                        // If it's a new event or the ID changed, update Firestore
+                        if (googleEventId && googleEventId !== (appointmentToEdit?.googleEventId || apt.googleEventId)) {
+                            await updateAppointment(apt.id!, { googleEventId });
+                        }
+                    } catch (syncError) {
+                        console.error(`Failed to sync appointment ${apt.id} with Google Calendar:`, syncError);
                     }
-                } catch (syncError) {
-                    console.error("Failed to sync with Google Calendar:", syncError);
                 }
             }
 
