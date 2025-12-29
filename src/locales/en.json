@@ -1,0 +1,36 @@
+{
+    "settings": {
+        "title": "Settings",
+        "subtitle": "Customize your application experience",
+        "appearance": {
+            "title": "Appearance",
+            "subtitle": "Choose your preferred theme",
+            "light": "Light Mode",
+            "dark": "Dark Mode"
+        },
+        "language": {
+            "title": "Language",
+            "subtitle": "Select your preferred language",
+            "english": "English",
+            "spanish": "Spanish"
+        }
+    },
+    "common": {
+        "save": "Save",
+        "dashboard": "Dashboard",
+        "appointments": "Appointments",
+        "patients": "Patients",
+        "logout": "Logout",
+        "loading": "Loading..."
+    },
+    "auth": {
+        "title": "Sign In",
+        "subtitle": "Enter your credentials to access your portal",
+        "email": "Email Address",
+        "password": "Password",
+        "rememberMe": "Remember me",
+        "forgotPassword": "Forgot password?",
+        "signIn": "Sign In",
+        "signingIn": "Signing in..."
+    }
+}

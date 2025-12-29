@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../../../config/firebase';
@@ -64,23 +65,27 @@ const LoginPage: React.FC = () => {
         }
     };
 
+    const { t } = useTranslation();
+
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 bg-cover bg-center" style={{ backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)), url(${loginBg})` }}>
-            <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-xl backdrop-blur-sm bg-opacity-90 border border-white/20">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8 bg-cover bg-center transition-all duration-500" style={{ backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), url(${loginBg})` }}>
+            <div className="absolute inset-0 bg-white/30 dark:bg-black/60 backdrop-blur-sm transition-colors duration-500"></div>
+
+            <div className="max-w-md w-full space-y-8 relative z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md p-10 rounded-3xl shadow-2xl border border-white/50 dark:border-gray-700 transition-colors duration-200">
                 <div>
-                    <h1 className="text-center text-4xl font-extrabold text-blue-600 tracking-tight">
+                    <h2 className="text-center text-4xl font-extrabold text-blue-600 dark:text-blue-400">
                         MediLink
-                    </h1>
-                    <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-                        Sign In
                     </h2>
-                    <p className="mt-2 text-center text-sm text-gray-600">
-                        Enter your credentials to access your portal
+                    <h2 className="mt-6 text-center text-3xl font-bold text-gray-900 dark:text-white">
+                        {t('auth.title')}
+                    </h2>
+                    <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-300">
+                        {t('auth.subtitle')}
                     </p>
                 </div>
 
                 {error && (
-                    <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
+                    <div className="bg-red-50 dark:bg-red-900/30 border-l-4 border-red-400 p-4 mb-4">
                         <div className="flex">
                             <div className="flex-shrink-0">
                                 <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
@@ -88,7 +93,7 @@ const LoginPage: React.FC = () => {
                                 </svg>
                             </div>
                             <div className="ml-3">
-                                <p className="text-sm text-red-700">{error}</p>
+                                <p className="text-sm text-red-700 dark:text-red-200">{error}</p>
                             </div>
                         </div>
                     </div>
@@ -97,8 +102,8 @@ const LoginPage: React.FC = () => {
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                     <div className="rounded-md shadow-sm -space-y-px">
                         <div className="mb-4">
-                            <label htmlFor="email-address" className="block text-sm font-medium text-gray-700 mb-1">
-                                Email Address
+                            <label htmlFor="email-address" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                {t('auth.email')}
                             </label>
                             <input
                                 id="email-address"
@@ -106,15 +111,15 @@ const LoginPage: React.FC = () => {
                                 type="email"
                                 autoComplete="email"
                                 required
-                                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-all shadow-sm hover:border-blue-400"
+                                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-all shadow-sm hover:border-blue-400 dark:bg-gray-700"
                                 placeholder="name@email.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />
                         </div>
                         <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                                Password
+                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                {t('auth.password')}
                             </label>
                             <input
                                 id="password"
@@ -122,7 +127,7 @@ const LoginPage: React.FC = () => {
                                 type="password"
                                 autoComplete="current-password"
                                 required
-                                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-all shadow-sm hover:border-blue-400"
+                                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-all shadow-sm hover:border-blue-400 dark:bg-gray-700"
                                 placeholder="••••••••"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -138,14 +143,14 @@ const LoginPage: React.FC = () => {
                                 type="checkbox"
                                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
                             />
-                            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900 cursor-pointer">
-                                Remember me
+                            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900 dark:text-gray-300 cursor-pointer">
+                                {t('auth.rememberMe')}
                             </label>
                         </div>
 
                         <div className="text-sm">
-                            <a href="#" className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
-                                Forgot password?
+                            <a href="#" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
+                                {t('auth.forgotPassword')}
                             </a>
                         </div>
                     </div>
@@ -162,10 +167,10 @@ const LoginPage: React.FC = () => {
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
-                                    Signing in...
+                                    {t('auth.signingIn')}
                                 </span>
                             ) : (
-                                'Sign In'
+                                t('auth.signIn')
                             )}
                         </button>
                     </div>
