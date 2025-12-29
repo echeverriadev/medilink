@@ -1,0 +1,36 @@
+{
+    "settings": {
+        "title": "Configuración",
+        "subtitle": "Personaliza tu experiencia en la aplicación",
+        "appearance": {
+            "title": "Apariencia",
+            "subtitle": "Elige tu tema preferido",
+            "light": "Modo Claro",
+            "dark": "Modo Oscuro"
+        },
+        "language": {
+            "title": "Idioma",
+            "subtitle": "Selecciona tu idioma preferido",
+            "english": "Inglés",
+            "spanish": "Español"
+        }
+    },
+    "common": {
+        "save": "Guardar",
+        "dashboard": "Tablero",
+        "appointments": "Citas",
+        "patients": "Pacientes",
+        "logout": "Cerrar Sesión",
+        "loading": "Cargando..."
+    },
+    "auth": {
+        "title": "Iniciar Sesión",
+        "subtitle": "Ingresa tus credenciales para acceder",
+        "email": "Correo Electrónico",
+        "password": "Contraseña",
+        "rememberMe": "Recordarme",
+        "forgotPassword": "¿Olvidaste tu contraseña?",
+        "signIn": "Entrar",
+        "signingIn": "Iniciando..."
+    }
+}
