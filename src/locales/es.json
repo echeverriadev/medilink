@@ -17,7 +17,7 @@
     },
     "common": {
         "save": "Guardar",
-        "dashboard": "Tablero",
+        "dashboard": "Dashboard",
         "appointments": "Citas",
         "patients": "Pacientes",
         "logout": "Cerrar Sesión",
