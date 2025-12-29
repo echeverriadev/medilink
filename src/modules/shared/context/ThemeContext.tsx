@@ -47,7 +47,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             }
         };
         fetchSettings();
-    }, [user, i18n]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user]);
 
     const setTheme = async (newTheme: Theme) => {
         setThemeState(newTheme);
