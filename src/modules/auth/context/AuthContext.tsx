@@ -5,18 +5,27 @@ import { auth, db } from '../../../config/firebase';
 
 export type UserRole = 'DOCTOR' | 'PATIENT' | 'SECRETARY' | 'ADMIN';
 
+export interface UserData {
+    role: UserRole;
+    name?: string;
+    surname?: string;
+    email?: string;
+}
+
 interface AuthContextType {
     user: User | null;
+    userData: UserData | null;
     role: UserRole | null;
     loading: boolean;
     error: string | null;
+    logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
-    const [role, setRole] = useState<UserRole | null>(null);
+    const [userData, setUserData] = useState<UserData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -28,14 +37,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (firebaseUser) {
                 setUser(firebaseUser);
                 try {
-                    // Fetch user role from Firestore
+                    // Fetch user details from Firestore
                     const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
                     if (userDoc.exists()) {
-                        setRole(userDoc.data().role as UserRole);
+                        const data = userDoc.data();
+                        setUserData({
+                            role: data.role as UserRole,
+                            name: data.name,
+                            surname: data.surname,
+                            email: data.email
+                        });
                     } else {
-                        // Default to patient or handle as needed if doc doesn't exist
-                        setRole(null);
-                        setError('User role not found');
+                        setUserData(null);
+                        setError('User profile not found');
                     }
                 } catch (err) {
                     console.error("Error fetching user role:", err);
@@ -43,7 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 }
             } else {
                 setUser(null);
-                setRole(null);
+                setUserData(null);
             }
             setLoading(false);
         });
@@ -51,8 +65,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return () => unsubscribe();
     }, []);
 
+    const logout = async () => {
+        try {
+            await auth.signOut();
+            setUser(null);
+            setUserData(null);
+        } catch (error) {
+            console.error("Error signing out:", error);
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, role, loading, error }}>
+        <AuthContext.Provider value={{ user, userData, role: userData?.role || null, loading, error, logout }}>
             {children}
         </AuthContext.Provider>
     );
