@@ -32,5 +32,139 @@
         "forgotPassword": "¿Olvidaste tu contraseña?",
         "signIn": "Entrar",
         "signingIn": "Iniciando..."
+    },
+    "dashboard": {
+        "welcome": "Bienvenido, Dr. {{name}}",
+        "specialist": "Especialista",
+        "calendar": {
+            "synced": "Calendario Sincronizado",
+            "sync": "Sincronizar Calendario",
+            "disconnect": "Desconectar Calendario",
+            "button": "Sincronizar"
+        },
+        "newAppointment": "Nueva Cita",
+        "stats": {
+            "totalPatients": "Total de Pacientes",
+            "activeRecords": "Expedientes activos",
+            "appointmentsToday": "Citas de Hoy",
+            "upcoming": "pendientes",
+            "cancelled": "Citas Canceladas",
+            "percentTotal": "% del total"
+        },
+        "upcoming": {
+            "title": "Próximas Citas Hoy",
+            "nextInLine": "Siguiente",
+            "attend": "Atender",
+            "empty": "No hay citas próximas para hoy."
+        }
+    },
+    "patients": {
+        "title": "Pacientes",
+        "subtitle": "Administra y registra los pacientes de tu clínica",
+        "searchPlaceholder": "Buscar por nombre o cédula...",
+        "newPatient": "Nuevo Paciente",
+        "table": {
+            "id": "Cédula",
+            "name": "Nombre",
+            "contact": "Contacto",
+            "age": "Edad",
+            "phone": "Teléfono",
+            "actions": "Acciones"
+        },
+        "noResults": "No hay resultados que coincidan con tu búsqueda.",
+        "noData": "No hay pacientes registrados aún.",
+        "loading": "Cargando pacientes...",
+        "deleteConfirm": "¿Estás seguro de que deseas eliminar este registro de paciente? Esta acción solo elimina el registro clínico, no la cuenta de autenticación.",
+        "deleteError": "Error al eliminar paciente",
+        "detail": {
+            "notFound": "Paciente no encontrado",
+            "notFoundDesc": "El registro con ID {{id}} no existe en nuestra base de datos.",
+            "back": "Volver a Pacientes",
+            "editProfile": "Editar Perfil",
+            "newVisit": "Nueva Visita",
+            "personalData": "Datos Personales",
+            "phone": "TELÉFONO",
+            "birthDate": "FECHA DE NACIMIENTO",
+            "address": "DIRECCIÓN",
+            "tabs": {
+                "history": "Historial",
+                "visits": "Visitas",
+                "exams": "Exámenes"
+            },
+            "noVisits": "No hay visitas médicas registradas aún.",
+            "noExams": "No se han ordenado exámenes médicos para este paciente aún.",
+            "viewLess": "Ver menos",
+            "viewMore": "Ver {{count}} visitas más",
+            "pendingResults": "Resultados pendientes",
+            "requiredExams": "Exámenes Requeridos",
+            "prescription": "Receta Médica",
+            "observations": "Observaciones",
+            "consultation": "Consulta"
+        },
+        "modal": {
+            "editTitle": "Editar Paciente",
+            "newTitle": "Registro de Nuevo Paciente",
+            "firstName": "Nombre",
+            "lastName": "Apellido",
+            "email": "Correo Electrónico",
+            "passwordFixed": "Contraseña (Fija)",
+            "passwordTemp": "Contraseña Temporal",
+            "id": "Cédula (ID Nacional)",
+            "phone": "Número de Teléfono",
+            "dob": "Fecha de Nacimiento",
+            "address": "Dirección Completa",
+            "cancel": "Cancelar",
+            "save": "Registrar Paciente",
+            "update": "Actualizar Paciente",
+            "saving": "Guardando..."
+        }
+    },
+    "appointments": {
+        "title": "Agenda Médica",
+        "subtitle": "Administra tus consultas y citas de pacientes",
+        "quickAdd": "Agregar Rápido",
+        "modal": {
+            "title": "Agendar Cita",
+            "patient": "Paciente",
+            "selectPatient": "Selecciona un paciente...",
+            "apptTitle": "Título de la Cita (Opcional)",
+            "type": "Tipo de Cita",
+            "recurring": "¿Cita Recurrente?",
+            "frequency": "FRECUENCIA",
+            "repetitions": "REPETICIONES",
+            "date": "Fecha",
+            "startTime": "Hora de Inicio",
+            "endTime": "Hora de Fin",
+            "description": "Descripción / Notas",
+            "cancelAppt": "Cancelar Cita",
+            "deleteAppt": "Eliminar Permanentemente",
+            "close": "Cerrar",
+            "confirm": "Confirmar Cita",
+            "update": "Actualizar Cita",
+            "processing": "Procesando...",
+            "cancelConfirm": "¿Estás seguro de que deseas cancelar esta cita?",
+            "deleteConfirm": "¿Estás seguro de que deseas ELIMINAR PERMANENTEMENTE esta cita? Esto liberará el espacio en tu agenda.",
+            "frequencies": {
+                "daily": "Diaria",
+                "weekly": "Semanal",
+                "monthly": "Mensual"
+            }
+        }
+    },
+    "consultation": {
+        "title": "Consulta Médica",
+        "subtitle": "Paciente: {{name}}",
+        "generalObservations": "Observaciones Generales",
+        "observationsPlaceholder": "Describa síntomas, evolución y hallazgos físicos...",
+        "medications": "Medicamentos / Receta",
+        "medicationsPlaceholder": "Liste los medicamentos recetados y dosis...",
+        "exams": "Exámenes de Laboratorio / Imágenes",
+        "examsPlaceholder": "Liste los exámenes requeridos (sangre, rayos X, etc)...",
+        "discard": "Descartar",
+        "save": "Guardar y Finalizar Consulta",
+        "saving": "Guardando Historia Clínica...",
+        "appointmentNotFound": "Cita no encontrada",
+        "loadError": "Error al cargar datos de la consulta",
+        "saveError": "Error al guardar la consulta"
     }
 }

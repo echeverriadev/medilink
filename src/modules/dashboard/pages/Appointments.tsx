@@ -5,6 +5,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import AppointmentModal from '../components/AppointmentModal';
 import { getDoctorAppointments, Appointment } from '../services/appointmentService';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../auth/context/AuthContext';
 
 interface CalendarEvent {
@@ -17,6 +18,7 @@ interface CalendarEvent {
 }
 
 const Appointments: React.FC = () => {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -62,10 +64,10 @@ const Appointments: React.FC = () => {
 
     return (
         <div className="space-y-6">
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex justify-between items-center">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-800">Medical Agenda</h2>
-                    <p className="text-gray-500 text-sm mt-1">Manage your consultations and patient appointments</p>
+                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white">{t('appointments.title')}</h2>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">{t('appointments.subtitle')}</p>
                 </div>
                 <button
                     onClick={() => { setSelectedSlot(null); setIsModalOpen(true); }}
@@ -74,20 +76,26 @@ const Appointments: React.FC = () => {
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
-                    Quick Add
+                    {t('appointments.quickAdd')}
                 </button>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
                 <style>{`
                     .fc .fc-toolbar-title { font-weight: 700; font-size: 1.25rem; color: #1e293b; }
+                    .dark .fc .fc-toolbar-title { color: #f8fafc; }
                     .fc .fc-button-primary { background-color: #2563eb; border-color: #2563eb; font-weight: 600; text-transform: capitalize; }
                     .fc .fc-button-primary:hover { background-color: #1d4ed8; border-color: #1d4ed8; }
                     .fc .fc-button-primary:disabled { background-color: #93c5fd; border-color: #93c5fd; }
                     .fc .fc-daygrid-day-number { font-weight: 600; color: #64748b; padding: 8px; }
+                    .dark .fc .fc-daygrid-day-number { color: #94a3b8; }
                     .fc .fc-col-header-cell-cushion { font-weight: 700; color: #1e293b; padding: 12px 0; }
+                    .dark .fc .fc-col-header-cell-cushion { color: #f8fafc; }
                     .fc-theme-standard td, .fc-theme-standard th { border-color: #f1f5f9; }
+                    .dark .fc-theme-standard td, .dark .fc-theme-standard th { border-color: #334155; }
                     .fc .fc-event { border-radius: 6px; padding: 2px 4px; font-size: 0.85rem; border: none; shadow: 0 1px 2px rgba(0,0,0,0.05); }
+                    .dark .fc .fc-timegrid-slot-label-cushion { color: #94a3b8; }
+                    .dark .fc .fc-list-day-cushion { background-color: #1f2937; }
                 `}</style>
                 <FullCalendar
                     plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
