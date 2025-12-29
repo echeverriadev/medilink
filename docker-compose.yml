@@ -1,0 +1,15 @@
+services:
+  medilink-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: medilink-app
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    # Environment variables are baked into the build for Vite, but can be passed for runtime if needed differently.
+    # Note: Vite env vars (VITE_*) are replaced at build time, so for a truly dynamic image,
+    # one might need a runtime script to inject env vars into window object, 
+    # but for this standard setup, baking them in via .env file at build time is standard for simple setups.
+    env_file:
+      - .env
