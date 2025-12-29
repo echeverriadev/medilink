@@ -4,10 +4,10 @@ import { getFirestore } from "firebase/firestore";
 
 // Replace these with your actual Firebase project configuration
 const firebaseConfig = {
-    apiKey: "REDACTED_SECRET",
-    authDomain: "medilink-2b336.firebaseapp.com",
-    projectId: "medilink-2b336",
-    appId: "1:16432908234:web:cc5549061141f8c8f5b133",
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 // Initialize Firebase
