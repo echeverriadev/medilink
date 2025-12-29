@@ -32,5 +32,139 @@
         "forgotPassword": "Forgot password?",
         "signIn": "Sign In",
         "signingIn": "Signing in..."
+    },
+    "dashboard": {
+        "welcome": "Welcome back, Dr. {{name}}",
+        "specialist": "Specialist",
+        "calendar": {
+            "synced": "Calendar Synced",
+            "sync": "Sync Personal Calendar",
+            "disconnect": "Disconnect Calendar",
+            "button": "Sync"
+        },
+        "newAppointment": "New Appointment",
+        "stats": {
+            "totalPatients": "Total Patients",
+            "activeRecords": "Active records",
+            "appointmentsToday": "Appointments Today",
+            "upcoming": "upcoming",
+            "cancelled": "Cancelled Appointments",
+            "percentTotal": "% of total"
+        },
+        "upcoming": {
+            "title": "Upcoming Appointments Today",
+            "nextInLine": "Next in line",
+            "attend": "Attend",
+            "empty": "No upcoming appointments for today."
+        }
+    },
+    "patients": {
+        "title": "Patients",
+        "subtitle": "Manage and register your clinic's patients",
+        "searchPlaceholder": "Search by name or ID...",
+        "newPatient": "New Patient",
+        "table": {
+            "id": "National ID",
+            "name": "Name",
+            "contact": "Contact",
+            "age": "Age",
+            "phone": "Phone",
+            "actions": "Actions"
+        },
+        "noResults": "No results matching your search.",
+        "noData": "No patients registered yet.",
+        "loading": "Loading patients...",
+        "deleteConfirm": "Are you sure you want to delete this patient record? This action only removes the clinical record, not the authentication account.",
+        "deleteError": "Failed to delete patient",
+        "detail": {
+            "notFound": "Patient not found",
+            "notFoundDesc": "The record with ID {{id}} does not exist in our database.",
+            "back": "Back to Patients",
+            "editProfile": "Edit Profile",
+            "newVisit": "New Visit",
+            "personalData": "Personal Data",
+            "phone": "PHONE",
+            "birthDate": "BIRTH DATE",
+            "address": "ADDRESS",
+            "tabs": {
+                "history": "History",
+                "visits": "Visits",
+                "exams": "Exams"
+            },
+            "noVisits": "No medical visits recorded yet.",
+            "noExams": "No medical exams have been ordered for this patient yet.",
+            "viewLess": "View less",
+            "viewMore": "View {{count}} more visits",
+            "pendingResults": "Pending results",
+            "requiredExams": "Required Exams",
+            "prescription": "Prescription",
+            "observations": "Observations",
+            "consultation": "Consultation"
+        },
+        "modal": {
+            "editTitle": "Edit Patient",
+            "newTitle": "New Patient Registration",
+            "firstName": "First Name",
+            "lastName": "Last Name",
+            "email": "Email",
+            "passwordFixed": "Password (Fixed)",
+            "passwordTemp": "Temp Password",
+            "id": "National ID (Cédula)",
+            "phone": "Phone Number",
+            "dob": "Date of Birth",
+            "address": "Full Address",
+            "cancel": "Cancel",
+            "save": "Register Patient",
+            "update": "Update Patient",
+            "saving": "Saving..."
+        }
+    },
+    "appointments": {
+        "title": "Medical Agenda",
+        "subtitle": "Manage your consultations and patient appointments",
+        "quickAdd": "Quick Add",
+        "modal": {
+            "title": "Schedule Appointment",
+            "patient": "Patient",
+            "selectPatient": "Select a patient...",
+            "apptTitle": "Appointment Title (Optional)",
+            "type": "Appointment Type",
+            "recurring": "Recurring Appointment?",
+            "frequency": "FREQUENCY",
+            "repetitions": "REPETITIONS",
+            "date": "Date",
+            "startTime": "Start Time",
+            "endTime": "End Time",
+            "description": "Description / Notes",
+            "cancelAppt": "Cancel Appointment",
+            "deleteAppt": "Delete Permanently",
+            "close": "Close",
+            "confirm": "Confirm Appointment",
+            "update": "Update Appointment",
+            "processing": "Processing...",
+            "cancelConfirm": "Are you sure you want to cancel this appointment?",
+            "deleteConfirm": "Are you sure you want to PERMANENTLY DELETE this appointment? This will free up the slot in your agenda.",
+            "frequencies": {
+                "daily": "Daily",
+                "weekly": "Weekly",
+                "monthly": "Monthly"
+            }
+        }
+    },
+    "consultation": {
+        "title": "Medical Consultation",
+        "subtitle": "Patient: {{name}}",
+        "generalObservations": "General Observations",
+        "observationsPlaceholder": "Describe symptoms, evolution, and physical findings...",
+        "medications": "Medications / Prescription",
+        "medicationsPlaceholder": "List prescribed medicines and dosage...",
+        "exams": "Required Laboratory / Exams",
+        "examsPlaceholder": "List required blood tests, imaging, etc...",
+        "discard": "Discard",
+        "save": "Save & Complete Consultation",
+        "saving": "Saving Clinical Record...",
+        "appointmentNotFound": "Appointment not found",
+        "loadError": "Failed to load consultation data",
+        "saveError": "Failed to save consultation"
     }
 }

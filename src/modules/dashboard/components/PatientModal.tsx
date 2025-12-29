@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { createPatient, updatePatient, PatientData } from '../services/patientService';
 
 interface PatientModalProps {
@@ -9,6 +10,7 @@ interface PatientModalProps {
 }
 
 const PatientModal: React.FC<PatientModalProps> = ({ isOpen, onClose, onPatientCreated, patientToEdit }) => {
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
@@ -99,12 +101,12 @@ const PatientModal: React.FC<PatientModalProps> = ({ isOpen, onClose, onPatientC
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-100">
-                <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-blue-50">
-                    <h3 className="text-xl font-bold text-blue-800">
-                        {patientToEdit ? 'Edit Patient' : 'New Patient Registration'}
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-100 dark:border-gray-700">
+                <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-blue-50 dark:bg-blue-900/20">
+                    <h3 className="text-xl font-bold text-blue-800 dark:text-blue-300">
+                        {patientToEdit ? t('patients.modal.editTitle') : t('patients.modal.newTitle')}
                     </h3>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+                    <button onClick={onClose} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -113,96 +115,96 @@ const PatientModal: React.FC<PatientModalProps> = ({ isOpen, onClose, onPatientC
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
                     {error && (
-                        <div className="bg-red-50 text-red-700 p-3 rounded-lg text-sm border border-red-100">
+                        <div className="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 p-3 rounded-lg text-sm border border-red-100 dark:border-red-900/30">
                             {error}
                         </div>
                     )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">First Name</label>
+                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">{t('patients.modal.firstName')}</label>
                             <input
                                 name="firstName" required value={formData.firstName} onChange={handleChange}
-                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white"
                                 placeholder="E.g. John"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">Last Name</label>
+                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">{t('patients.modal.lastName')}</label>
                             <input
                                 name="lastName" required value={formData.lastName} onChange={handleChange}
-                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white"
                                 placeholder="E.g. Doe"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">{t('patients.modal.email')}</label>
                             <input
                                 name="email" type="email" required disabled={!!patientToEdit}
                                 value={formData.email} onChange={handleChange}
-                                className={`w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${patientToEdit ? 'bg-gray-100 cursor-not-allowed' : 'bg-gray-50'}`}
+                                className={`w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white ${patientToEdit ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed text-gray-500' : 'bg-gray-50 dark:bg-gray-700'}`}
                                 placeholder="john@example.com"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">
-                                {patientToEdit ? 'Password (Fixed)' : 'Temp Password'}
+                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                {patientToEdit ? t('patients.modal.passwordFixed') : t('patients.modal.passwordTemp')}
                             </label>
                             <input
                                 name="password" type="password" required={!patientToEdit} disabled={!!patientToEdit}
                                 value={formData.password} onChange={handleChange}
-                                className={`w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${patientToEdit ? 'bg-gray-100 cursor-not-allowed' : 'bg-gray-50'}`}
+                                className={`w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white ${patientToEdit ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed text-gray-500' : 'bg-gray-50 dark:bg-gray-700'}`}
                                 placeholder={patientToEdit ? '••••••••' : '••••••••'}
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">National ID (Cédula)</label>
+                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">{t('patients.modal.id')}</label>
                             <input
                                 name="cedula" required value={formData.cedula} onChange={handleChange}
-                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"
                                 placeholder="1234567890"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">Phone Number</label>
+                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">{t('patients.modal.phone')}</label>
                             <input
                                 name="phone" required value={formData.phone} onChange={handleChange}
-                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"
                                 placeholder="+1 234 567 890"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">Date of Birth</label>
+                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">{t('patients.modal.dob')}</label>
                             <input
                                 name="birthDate" type="date" required value={formData.birthDate} onChange={handleChange}
-                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"
                             />
                         </div>
                         <div className="md:col-span-1">
                             {/* Empty space for grid alignment or more fields */}
                         </div>
                         <div className="col-span-2">
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">Full Address</label>
+                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">{t('patients.modal.address')}</label>
                             <input
                                 name="address" required value={formData.address} onChange={handleChange}
-                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"
                                 placeholder="Street 123, City, Country"
                             />
                         </div>
                     </div>
 
-                    <div className="pt-4 border-t border-gray-100 flex gap-3">
+                    <div className="pt-4 border-t border-gray-100 dark:border-gray-700 flex gap-3">
                         <button
                             type="button" onClick={onClose}
-                            className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition-all text-sm"
+                            className="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-bold rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-all text-sm"
                         >
-                            Cancel
+                            {t('patients.modal.cancel')}
                         </button>
                         <button
                             type="submit" disabled={loading}
                             className={`flex-1 px-4 py-2 text-white font-bold rounded-lg transition-all text-sm shadow-md ${loading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 active:scale-95'}`}
                         >
-                            {loading ? 'Saving...' : (patientToEdit ? 'Update Patient' : 'Register Patient')}
+                            {loading ? t('patients.modal.saving') : (patientToEdit ? t('patients.modal.update') : t('patients.modal.save'))}
                         </button>
                     </div>
                 </form>
